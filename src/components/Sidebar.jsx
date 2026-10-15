@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  LayoutDashboard,
+  LayoutGrid,
   Briefcase,
   Users2,
   UserCheck,
@@ -14,7 +14,7 @@ import {
 
 export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggleAi }) {
   const menuItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'overview', label: 'Overview', icon: LayoutGrid },
     { id: 'ai-advisor', label: 'AI Advisor', icon: Bot, isAi: true },
     { id: 'projects', label: 'Projects', icon: Briefcase },
     { id: 'team-builder', label: 'Team Builder', icon: Users2 },
@@ -29,7 +29,7 @@ export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggl
     <aside className="sidebar">
       <div className="sidebar-header">
         <div className="brand-icon-wrapper">
-          <Users2 size={22} />
+          <Users2 size={24} />
         </div>
         <div>
           <div className="brand-title">Workforce<br />Intelligence</div>
@@ -46,7 +46,7 @@ export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggl
               className={`nav-item ${isActive ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
             >
-              <Icon size={18} />
+              <Icon size={19} />
               <span>{item.label}</span>
               {item.isAi && (
                 <span
@@ -54,10 +54,11 @@ export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggl
                     marginLeft: 'auto',
                     fontSize: '0.62rem',
                     fontWeight: '700',
-                    padding: '1px 6px',
+                    padding: '2px 6px',
                     borderRadius: '4px',
-                    backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(118, 185, 0, 0.2)',
-                    color: isActive ? '#ffffff' : '#84cc16'
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(101, 163, 13, 0.12)',
+                    color: isActive ? '#ffffff' : '#4d7c0f',
+                    border: isActive ? 'none' : '1px solid rgba(101, 163, 13, 0.25)'
                   }}
                 >
                   NIM

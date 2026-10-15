@@ -13,7 +13,7 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/nvidia/, ''),
         headers: {
-          'Authorization': 'Bearer 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'
+          'Authorization': 'Bearer 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'
         }
       }
     }
