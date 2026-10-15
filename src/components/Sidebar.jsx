@@ -56,11 +56,11 @@ export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggl
                     fontWeight: '700',
                     padding: '1px 6px',
                     borderRadius: '4px',
-                    backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(118, 185, 0, 0.2)',
-                    color: isActive ? '#ffffff' : '#84cc16'
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(56, 189, 248, 0.2)',
+                    color: isActive ? '#ffffff' : '#38bdf8'
                   }}
                 >
-                  NIM
+                  AI
                 </span>
               )}
             </button>

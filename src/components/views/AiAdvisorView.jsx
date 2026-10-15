@@ -19,7 +19,7 @@ import {
   BookOpen,
   CheckCircle2
 } from 'lucide-react';
-import { askNvidiaAssistant } from '../../utils/nvidiaAiService';
+import { askDronaHqAdvisor, DRONAHQ_WEBHOOK_URL } from '../../utils/dronaHqService';
 
 export default function AiAdvisorView({
   projects = [],
@@ -42,6 +42,7 @@ export default function AiAdvisorView({
   const messagesEndRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
+  const [threadId, setThreadId] = useState(null);
 
   const scrollToBottom = () => {
     if (chatScrollRef.current) {
@@ -117,8 +118,9 @@ export default function AiAdvisorView({
     setIsGenerating(true);
 
     try {
-      const responseText = await askNvidiaAssistant({
+      const result = await askDronaHqAdvisor({
         prompt: query,
+        threadId,
         agentId: activeAgentId,
         project: selectedProject,
         recommendation,
@@ -126,6 +128,12 @@ export default function AiAdvisorView({
         skillGaps,
         history: messages
       });
+
+      if (result.threadId) {
+        setThreadId(result.threadId);
+      }
+
+      const responseText = result.text;
 
       // Detect structured data to render interactive cards
       let structuredData = null;
@@ -168,7 +176,7 @@ export default function AiAdvisorView({
 
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {
-      console.error('NVIDIA AI query failed:', err);
+      console.error('DronaHQ AI query failed:', err);
       setMessages(prev => [
         ...prev,
         {
@@ -176,7 +184,7 @@ export default function AiAdvisorView({
           sender: 'assistant',
           agent: 'System',
           isError: true,
-          text: 'Unable to reach NVIDIA NIM inference service. Non-AI deterministic workforce tools remain fully operational.',
+          text: 'Unable to reach DronaHQ Agent webhook. Non-AI deterministic workforce tools remain fully operational.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -223,21 +231,22 @@ export default function AiAdvisorView({
                   style={{
                     fontSize: '0.66rem',
                     fontWeight: '700',
-                    color: '#15803d',
-                    backgroundColor: '#dcfce7',
+                    color: '#0369a1',
+                    backgroundColor: '#e0f2fe',
                     padding: '2px 8px',
                     borderRadius: '9999px',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px'
                   }}
+                  title="Connected to DronaHQ Agent Webhook"
                 >
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
-                  NVIDIA NIM
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0284c7' }}></span>
+                  DronaHQ Agent
                 </span>
               </div>
               <p style={{ fontSize: '0.76rem', color: '#64748b', margin: 0, marginTop: '1px' }}>
-                Chat with your autonomous workforce intelligence copilot
+                Chat with your autonomous workforce intelligence copilot • Powered by DronaHQ
               </p>
             </div>
           </div>
@@ -276,7 +285,7 @@ export default function AiAdvisorView({
                 How can I help with your workforce?
               </h3>
               <p className="ai-advisor-empty-desc">
-                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by real organization data and NVIDIA NIM.
+                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by DronaHQ AI Agent webhook.
               </p>
             </div>
           )}
@@ -324,13 +333,13 @@ export default function AiAdvisorView({
                         style={{
                           fontSize: '0.62rem',
                           fontWeight: '700',
-                          color: '#15803d',
-                          backgroundColor: '#dcfce7',
+                          color: '#0369a1',
+                          backgroundColor: '#e0f2fe',
                           padding: '1px 6px',
                           borderRadius: '9999px'
                         }}
                       >
-                        NVIDIA NIM
+                        DronaHQ Agent
                       </span>
                     )}
                   </div>
@@ -708,8 +717,8 @@ export default function AiAdvisorView({
                   gap: '8px'
                 }}
               >
-                <Loader2 size={16} className="spin-animation" color="#76b900" />
-                <span>NVIDIA NIM is reasoning across real organization data...</span>
+                <Loader2 size={16} className="spin-animation" color="#0284c7" />
+                <span>DronaHQ Agent is processing query across workforce data...</span>
               </div>
             </div>
           )}
@@ -767,7 +776,7 @@ export default function AiAdvisorView({
           >
             <input
               type="text"
-              placeholder={isGenerating ? "NVIDIA AI is thinking..." : "Ask AI Advisor anything..."}
+              placeholder={isGenerating ? "Connecting to DronaHQ Agent..." : "Ask AI Advisor anything..."}
               value={inputText}
               disabled={isGenerating}
               onChange={(e) => setInputText(e.target.value)}

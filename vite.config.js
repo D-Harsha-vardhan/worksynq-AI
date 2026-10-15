@@ -15,6 +15,11 @@ export default defineConfig({
         headers: {
           'Authorization': 'Bearer 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'
         }
+      },
+      '/api/dronahq': {
+        target: 'https://agents-backend.dronahq.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/dronahq/, '')
       }
     }
   }
