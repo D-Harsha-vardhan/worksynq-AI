@@ -33,16 +33,21 @@ export default function AiAdvisorView({
   const [selectedAgent, setSelectedAgent] = useState('optimizer'); // 'general', 'analyst', 'optimizer', 'balancer'
   const [inputText, setInputText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const chatScrollRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
   }, [messages, isGenerating]);
 
   const agents = [
@@ -134,7 +139,7 @@ export default function AiAdvisorView({
       const assistantMsg = {
         id: Date.now() + 1,
         sender: 'assistant',
-        agent: agentObj.name,
+        agent: 'AI Advisor',
         text: responseText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -163,68 +168,23 @@ export default function AiAdvisorView({
 
   return (
     <div className="ai-advisor-container" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Top Banner Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0b1528 0%, #1e293b 100%)',
-        borderRadius: '14px',
-        padding: '24px 28px',
-        color: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-        border: '1px solid rgba(255, 255, 255, 0.08)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(79, 70, 229, 0.4)'
-          }}>
-            <Bot size={26} color="#ffffff" />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <h2 style={{ fontSize: '1.45rem', fontWeight: '800', letterSpacing: '-0.02em', margin: 0 }}>
-                AI Workforce Advisor
-              </h2>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: '700',
-                padding: '2px 8px',
-                borderRadius: '9999px',
-                backgroundColor: 'rgba(118, 185, 0, 0.2)',
-                color: '#84cc16',
-                border: '1px solid rgba(132, 204, 22, 0.4)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Cpu size={12} color="#84cc16" />
-                NVIDIA NIM • DiffusionGemma-26B
-              </span>
-            </div>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '4px', margin: 0 }}>
-              Chat with autonomous multi-agent intelligence powered by your real organization datasets.
-            </p>
-          </div>
+      {/* Top Page Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#0f172a' }}>AI Advisor</h2>
+          <p style={{ fontSize: '0.84rem', color: '#64748b' }}>
+            Chat directly with your autonomous workforce intelligence assistant powered by NVIDIA NIM.
+          </p>
         </div>
-
-        {/* Clear History Button */}
         <button
           onClick={handleClearChat}
           style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: '#e2e8f0',
-            padding: '8px 14px',
+            background: '#ffffff',
+            border: '1px solid #cbd5e1',
+            color: '#475569',
+            padding: '7px 14px',
             borderRadius: '8px',
-            fontSize: '0.78rem',
+            fontSize: '0.8rem',
             fontWeight: '600',
             display: 'flex',
             alignItems: 'center',
@@ -243,59 +203,19 @@ export default function AiAdvisorView({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '20px', alignItems: 'start' }}>
         {/* Left Column: Chat Workspace */}
         <div className="card" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: '680px', overflow: 'hidden' }}>
-          {/* Agent Mode Selector Header */}
-          <div style={{
-            padding: '12px 18px',
-            borderBottom: '1px solid var(--border-light)',
-            backgroundColor: '#f8fafc',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            overflowX: 'auto'
-          }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginRight: '4px' }}>
-              Specialist Agent:
-            </span>
-            {agents.map(ag => {
-              const Icon = ag.icon;
-              const isSelected = selectedAgent === ag.id;
-              return (
-                <button
-                  key={ag.id}
-                  onClick={() => setSelectedAgent(ag.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.76rem',
-                    fontWeight: isSelected ? '700' : '500',
-                    border: isSelected ? `1px solid ${ag.color}` : '1px solid #e2e8f0',
-                    backgroundColor: isSelected ? ag.bgColor : '#ffffff',
-                    color: isSelected ? ag.color : '#475569',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  <Icon size={14} color={isSelected ? ag.color : '#64748b'} />
-                  <span>{ag.name}</span>
-                </button>
-              );
-            })}
-          </div>
-
           {/* Chat Messages Stream */}
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            backgroundColor: '#ffffff'
-          }}>
+          <div
+            ref={chatScrollRef}
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              backgroundColor: '#ffffff'
+            }}
+          >
             {messages.length === 0 && !isGenerating && (
               <div style={{
                 margin: 'auto',
@@ -486,7 +406,7 @@ export default function AiAdvisorView({
             >
               <input
                 type="text"
-                placeholder={isGenerating ? "NVIDIA AI is thinking..." : `Ask ${agents.find(a => a.id === selectedAgent)?.name || 'AI Advisor'} anything...`}
+                placeholder={isGenerating ? "NVIDIA AI is thinking..." : "Ask AI Advisor anything..."}
                 value={inputText}
                 disabled={isGenerating}
                 onChange={(e) => setInputText(e.target.value)}
@@ -607,41 +527,28 @@ export default function AiAdvisorView({
             </div>
           </div>
 
-          {/* Card: Active Agent Capabilities */}
+          {/* Card: AI Intelligence Engine */}
           <div className="card" style={{ padding: '18px 20px' }}>
-            <h3 style={{ fontSize: '0.92rem', fontWeight: '700', color: '#0f172a', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '0.92rem', fontWeight: '700', color: '#0f172a', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Cpu size={16} color="#76b900" />
-              NVIDIA NIM Agents
+              AI Intelligence Engine
             </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {agents.map(ag => {
-                const Icon = ag.icon;
-                return (
-                  <div
-                    key={ag.id}
-                    onClick={() => {
-                      setSelectedAgent(ag.id);
-                    }}
-                    style={{
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: selectedAgent === ag.id ? ag.bgColor : '#f8fafc',
-                      border: selectedAgent === ag.id ? `1px solid ${ag.color}` : '1px solid #e2e8f0',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Icon size={14} color={ag.color} />
-                      <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0f172a' }}>{ag.name}</span>
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
-                      {ag.desc}
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.8rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                <span style={{ color: '#64748b' }}>Model</span>
+                <span style={{ fontWeight: '700', color: '#0f172a', fontSize: '0.76rem' }}>DiffusionGemma-26B</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                <span style={{ color: '#64748b' }}>Provider</span>
+                <span style={{ fontWeight: '700', color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <ShieldCheck size={14} color="#15803d" /> NVIDIA NIM
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                <span style={{ color: '#64748b' }}>Organization Data</span>
+                <span style={{ fontWeight: '600', color: '#2563eb' }}>Real Datasets Connected</span>
+              </div>
             </div>
           </div>
         </div>
