@@ -53,7 +53,7 @@ export default function AiAdvisorView({
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [loadingSecondsLeft, setLoadingSecondsLeft] = useState(25);
-  const [loadingStageText, setLoadingStageText] = useState('Initializing NVIDIA NIM deep reasoning engine...');
+  const [loadingStageText, setLoadingStageText] = useState('Analyzing workforce data & capabilities...');
 
   const scrollToBottom = () => {
     if (chatScrollRef.current) {
@@ -299,22 +299,22 @@ connect2future`;
       currentRecommendation = recommendOptimalTeam(targetProject, employees, targetProject.teamSize || 4);
     }
 
-    // 25-second deep reasoning simulation timer as requested
+    // 25-second progressive reasoning simulation
     setLoadingSecondsLeft(25);
-    setLoadingStageText('Connecting to NVIDIA NIM llama-3.1-70b-instruct cluster...');
+    setLoadingStageText('Analyzing requirements & talent capabilities...');
 
     let timerInterval = null;
     timerInterval = setInterval(() => {
       setLoadingSecondsLeft(prev => {
         const next = prev - 1;
         if (next <= 5) {
-          setLoadingStageText('Synthesizing final executive briefing & team recommendation payload...');
+          setLoadingStageText('Synthesizing executive briefing & team recommendation payload...');
         } else if (next <= 10) {
           setLoadingStageText('Auditing financial feasibility, margins & commercial profit ROI for connect2future...');
         } else if (next <= 15) {
           setLoadingStageText('Evaluating project delivery milestones, sprint effort & capacity buffers...');
         } else if (next <= 20) {
-          setLoadingStageText('Scanning connect2future talent pool & active employee skill matrix...');
+          setLoadingStageText('Scanning talent pool & active employee skill matrix...');
         }
         return Math.max(0, next);
       });
@@ -458,7 +458,7 @@ connect2future`;
           sender: 'assistant',
           agent: 'System',
           isError: true,
-          text: 'Unable to reach NVIDIA NIM inference service. Non-AI deterministic workforce tools remain fully operational.',
+          text: 'Unable to complete AI query at this time. Non-AI deterministic workforce tools remain fully operational.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -514,10 +514,10 @@ connect2future`;
                     alignItems: 'center',
                     gap: '4px'
                   }}
-                  title="Powered by NVIDIA NIM Inference API (DiffusionGemma-26B)"
+                  title="AI Inference Service Active"
                 >
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
-                  NVIDIA NIM • Live
+                  AI Copilot • Live
                 </span>
                 <span
                   style={{
@@ -539,7 +539,7 @@ connect2future`;
                 </span>
               </div>
               <p style={{ fontSize: '0.76rem', color: '#64748b', margin: 0, marginTop: '1px' }}>
-                Chat with your autonomous workforce intelligence copilot • Powered by NVIDIA NIM & ElevenLabs Voice
+                Chat with your autonomous workforce intelligence copilot • Powered by AI & Voice Assistant
               </p>
             </div>
           </div>
@@ -578,7 +578,7 @@ connect2future`;
                 How can I help with your workforce?
               </h3>
               <p className="ai-advisor-empty-desc">
-                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by NVIDIA NIM and ElevenLabs Voice.
+                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by AI and Voice Assistant.
               </p>
             </div>
           )}
@@ -632,7 +632,7 @@ connect2future`;
                           borderRadius: '9999px'
                         }}
                       >
-                        NVIDIA NIM
+                        AI Copilot
                       </span>
                     )}
                   </div>
@@ -1382,24 +1382,10 @@ connect2future`;
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                 }}
               >
-                {/* Header with spinner and countdown */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#0f172a' }}>
-                    <Loader2 size={16} className="spin-animation" color="#2563eb" />
-                    <span>NVIDIA NIM Deep Reasoning</span>
-                  </div>
-                  <span style={{
-                    fontSize: '0.72rem',
-                    fontWeight: '700',
-                    color: '#2563eb',
-                    backgroundColor: '#eff6ff',
-                    padding: '2px 8px',
-                    borderRadius: '9999px',
-                    border: '1px solid #bfdbfe',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    ⏱️ {loadingSecondsLeft}s remaining
-                  </span>
+                {/* Header with spinner and Thinking... */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#0f172a' }}>
+                  <Loader2 size={16} className="spin-animation" color="#2563eb" />
+                  <span style={{ fontSize: '0.9rem' }}>Thinking...</span>
                 </div>
 
                 {/* Progress Bar Track */}
