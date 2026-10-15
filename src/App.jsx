@@ -110,7 +110,7 @@ export default function App() {
         {/* Content Body: Center Main + Right AI Sidebar */}
         <div className="content-body">
           {/* Center Dashboard View */}
-          <main className="dashboard-center">
+          <main className={`dashboard-center ${activeTab === 'ai-advisor' ? 'ai-advisor-mode' : ''}`}>
             {activeTab === 'overview' && (
               <>
                 {/* Greeting */}
@@ -173,6 +173,7 @@ export default function App() {
                 onOpenRebalanceModal={() => setShowRebalanceModal(true)}
                 onOpenWhyModal={() => setShowWhyModal(true)}
                 onViewEmployee={(emp) => setViewEmployeeTarget(emp)}
+                onNavigateTab={(tab) => setActiveTab(tab)}
               />
             )}
 
@@ -206,6 +207,7 @@ export default function App() {
               <WorkloadView
                 employees={employees}
                 isRebalanced={isRebalanced}
+                onApplyRebalance={handleApplyRebalance}
                 onOpenRebalanceModal={() => setShowRebalanceModal(true)}
               />
             )}

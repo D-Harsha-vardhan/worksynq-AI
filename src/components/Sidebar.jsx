@@ -61,7 +61,7 @@ export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggl
                     border: isActive ? 'none' : '1px solid rgba(101, 163, 13, 0.25)'
                   }}
                 >
-                  NIM
+                  AI
                 </span>
               )}
             </button>
