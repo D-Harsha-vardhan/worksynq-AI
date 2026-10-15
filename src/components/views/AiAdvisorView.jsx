@@ -35,23 +35,7 @@ export default function AiAdvisorView({
   const [isGenerating, setIsGenerating] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'assistant',
-      agent: 'NVIDIA NIM Copilot',
-      text: `Hello! I am your AI Workforce Advisor powered by **NVIDIA NIM (DiffusionGemma-26B)**. 
-
-I have full real-time awareness of your organization:
-- **60 Employees** across Engineering, Backend, Frontend, Cloud & DevOps
-- **11 Active Projects** (Currently focusing on *${selectedProject?.name || 'Customer Analytics Platform'}*)
-- **71.9% Avg Utilization** with ${workloadStats?.topOverutilized?.length || 3} overloaded staff and safe bandwidth buffers
-- **${skillGaps.length} Skill Deficits** with targeted training paths
-
-Ask me anything about team formation, workload leveling, employee allocation, or talent strategy!`,
-      timestamp: 'Just now'
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -174,7 +158,7 @@ Ask me anything about team formation, workload leveling, employee allocation, or
   };
 
   const handleClearChat = () => {
-    setMessages([messages[0]]);
+    setMessages([]);
   };
 
   return (
@@ -312,6 +296,40 @@ Ask me anything about team formation, workload leveling, employee allocation, or
             gap: '16px',
             backgroundColor: '#ffffff'
           }}>
+            {messages.length === 0 && !isGenerating && (
+              <div style={{
+                margin: 'auto',
+                textAlign: 'center',
+                padding: '40px 20px',
+                maxWidth: '460px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)',
+                  border: '1px solid #bfdbfe',
+                  color: '#2563eb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '12px',
+                  boxShadow: '0 4px 12px rgba(37, 99, 235, 0.12)'
+                }}>
+                  <Bot size={26} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>
+                  AI Workforce Advisor
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.55, margin: 0 }}>
+                  Ask any question about your organization's talent, team formations, skill gaps, or workload balancing.
+                </p>
+              </div>
+            )}
+
             {messages.map(msg => (
               <div
                 key={msg.id}
