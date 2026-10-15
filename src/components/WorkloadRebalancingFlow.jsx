@@ -20,7 +20,8 @@ import {
   Layers,
   BarChart3,
   RefreshCw,
-  Gauge
+  Gauge,
+  Loader2
 } from 'lucide-react';
 
 export const initialRebalanceTasks = [
@@ -319,40 +320,49 @@ export default function WorkloadRebalancingFlow({
     }
   }, [isRebalanced]);
 
-  // Handle analysis progression
+  // Handle analysis progression: exactly 10 seconds total loading
   useEffect(() => {
     if (currentScreen === 'analyze') {
+      setAnalysisStage(1);
+      setAnalysisProgress(15);
+
       const timer1 = setTimeout(() => {
         setAnalysisStage(2);
-        setAnalysisProgress(50);
-      }, 600);
+        setAnalysisProgress(40);
+      }, 2500);
 
       const timer2 = setTimeout(() => {
         setAnalysisStage(3);
-        setAnalysisProgress(75);
-      }, 1200);
+        setAnalysisProgress(65);
+      }, 5000);
 
       const timer3 = setTimeout(() => {
         setAnalysisStage(4);
-        setAnalysisProgress(100);
-      }, 1800);
+        setAnalysisProgress(88);
+      }, 7500);
 
       const timer4 = setTimeout(() => {
+        setAnalysisStage(5);
+        setAnalysisProgress(100);
+      }, 9500);
+
+      const timerDone = setTimeout(() => {
         setCurrentScreen('recommendations');
-      }, 2400);
+      }, 10000);
 
       return () => {
         clearTimeout(timer1);
         clearTimeout(timer2);
         clearTimeout(timer3);
         clearTimeout(timer4);
+        clearTimeout(timerDone);
       };
     }
   }, [currentScreen]);
 
   const handleStartAnalysis = () => {
     setAnalysisStage(1);
-    setAnalysisProgress(25);
+    setAnalysisProgress(15);
     setCurrentScreen('analyze');
   };
 
@@ -686,42 +696,66 @@ export default function WorkloadRebalancingFlow({
           {/* Item 1 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.82rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a' }}>
-              <CheckCircle2 size={16} color="#16a34a" />
+              {analysisStage > 1 ? (
+                <CheckCircle2 size={16} color="#16a34a" />
+              ) : (
+                <Loader2 size={16} className="spin-animation" color="#2563eb" />
+              )}
               <span>Checking employee utilization &amp; capacity</span>
             </div>
-            <span style={{ color: '#16a34a', fontWeight: '600' }}>Complete</span>
+            <span style={{ color: analysisStage > 1 ? '#16a34a' : '#2563eb', fontWeight: '600' }}>
+              {analysisStage > 1 ? 'Complete' : 'In progress'}
+            </span>
           </div>
 
           {/* Item 2 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.82rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a' }}>
-              <CheckCircle2 size={16} color="#16a34a" />
+              {analysisStage > 2 ? (
+                <CheckCircle2 size={16} color="#16a34a" />
+              ) : analysisStage === 2 ? (
+                <Loader2 size={16} className="spin-animation" color="#2563eb" />
+              ) : (
+                <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #cbd5e1' }} />
+              )}
               <span>Analyzing skills and compatibility</span>
             </div>
-            <span style={{ color: '#16a34a', fontWeight: '600' }}>Complete</span>
+            <span style={{ color: analysisStage > 2 ? '#16a34a' : analysisStage === 2 ? '#2563eb' : '#94a3b8', fontWeight: '600' }}>
+              {analysisStage > 2 ? 'Complete' : analysisStage === 2 ? 'In progress' : 'Queued'}
+            </span>
           </div>
 
           {/* Item 3 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.82rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a' }}>
-              <CheckCircle2 size={16} color="#16a34a" />
+              {analysisStage > 3 ? (
+                <CheckCircle2 size={16} color="#16a34a" />
+              ) : analysisStage === 3 ? (
+                <Loader2 size={16} className="spin-animation" color="#2563eb" />
+              ) : (
+                <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #cbd5e1' }} />
+              )}
               <span>Reviewing leave dates and commitments</span>
             </div>
-            <span style={{ color: '#16a34a', fontWeight: '600' }}>Complete</span>
+            <span style={{ color: analysisStage > 3 ? '#16a34a' : analysisStage === 3 ? '#2563eb' : '#94a3b8', fontWeight: '600' }}>
+              {analysisStage > 3 ? 'Complete' : analysisStage === 3 ? 'In progress' : 'Queued'}
+            </span>
           </div>
 
           {/* Item 4 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.82rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a' }}>
-              {analysisStage >= 4 ? (
+              {analysisStage >= 5 ? (
                 <CheckCircle2 size={16} color="#16a34a" />
+              ) : analysisStage === 4 ? (
+                <Loader2 size={16} className="spin-animation" color="#2563eb" />
               ) : (
-                <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #2563eb', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
+                <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #cbd5e1' }} />
               )}
               <span>Evaluating task dependencies and deadlines</span>
             </div>
-            <span style={{ color: analysisStage >= 4 ? '#16a34a' : '#2563eb', fontWeight: '600' }}>
-              {analysisStage >= 4 ? 'Complete' : 'In progress'}
+            <span style={{ color: analysisStage >= 5 ? '#16a34a' : analysisStage === 4 ? '#2563eb' : '#94a3b8', fontWeight: '600' }}>
+              {analysisStage >= 5 ? 'Complete' : analysisStage === 4 ? 'In progress' : 'Queued'}
             </span>
           </div>
         </div>
