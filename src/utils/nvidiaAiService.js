@@ -75,7 +75,8 @@ export async function askNvidiaAssistant({
   project = null,
   recommendation = null,
   workloadStats = null,
-  skillGaps = []
+  skillGaps = [],
+  history = []
 }) {
   const teamNames = recommendation?.recommendedMembers?.map(m => `${m.employee.name} (${m.matchScore}% fit)`).join(', ') || 'Team not formed';
   const gapsList = recommendation?.identifiedGaps?.map(g => g.skill).join(', ') || 'No critical gaps';
@@ -100,8 +101,17 @@ Current Organization Context:
 
 Provide a concise, practical, highly professional 2-3 sentence answer specifically addressing the query using the organizational context.`;
 
+  const conversationContext = (history || [])
+    .filter(h => h.text)
+    .slice(-4)
+    .map(h => ({
+      role: h.sender === 'user' ? 'user' : 'assistant',
+      content: h.text
+    }));
+
   const messages = [
     { role: 'system', content: systemPrompt },
+    ...conversationContext,
     { role: 'user', content: prompt }
   ];
 

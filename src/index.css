@@ -369,6 +369,21 @@ a {
   overflow-y: auto;
 }
 
+.dashboard-center.ai-advisor-mode {
+  padding: 16px 24px;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .dashboard-center.ai-advisor-mode {
+    padding: 10px 12px;
+    height: calc(100vh - 60px);
+  }
+}
+
 .ai-sidebar {
   width: 340px;
   min-width: 340px;
