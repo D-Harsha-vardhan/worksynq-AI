@@ -7,9 +7,11 @@ import {
   Filter,
   CheckCircle2,
   AlertTriangle,
-  Award
+  Award,
+  ExternalLink
 } from 'lucide-react';
 import { additionalSkillGapsSummary } from '../data/additionalWorkforceData';
+import { getCourseUrl } from '../utils/courseLinks';
 
 export default function SkillGapRecommendationsCard({ onEnrollTraining }) {
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'critical', 'high', 'mentorship'
@@ -246,15 +248,44 @@ export default function SkillGapRecommendationsCard({ onEnrollTraining }) {
                     color: isMentorship ? '#4f46e5' : '#1e293b',
                     fontWeight: isMentorship ? '600' : '500'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {isMentorship ? (
                         <UserCheck size={13} color="#4f46e5" style={{ flexShrink: 0 }} />
                       ) : (
                         <BookOpen size={13} color="#2563eb" style={{ flexShrink: 0 }} />
                       )}
-                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }} title={item.recommendedCourse}>
-                        {item.recommendedCourse}
-                      </span>
+                      <a
+                        href={getCourseUrl(item.skill, item.recommendedCourse)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Open course: ${item.recommendedCourse} (opens in new tab)`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: isMentorship ? '#4f46e5' : '#2563eb',
+                          textDecoration: 'none',
+                          maxWidth: '180px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          fontWeight: '600',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.textDecoration = 'underline';
+                          e.currentTarget.style.color = '#1d4ed8';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.textDecoration = 'none';
+                          e.currentTarget.style.color = isMentorship ? '#4f46e5' : '#2563eb';
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.recommendedCourse}
+                        </span>
+                        <ExternalLink size={12} style={{ flexShrink: 0, opacity: 0.85 }} />
+                      </a>
                     </div>
                   </td>
 

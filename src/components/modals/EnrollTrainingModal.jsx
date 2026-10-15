@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, GraduationCap, CheckCircle2, Clock, DollarSign, Award, Users } from 'lucide-react';
+import { X, GraduationCap, CheckCircle2, Clock, DollarSign, Award, Users, BookOpen, ExternalLink } from 'lucide-react';
+import { getCourseUrl } from '../../utils/courseLinks';
 
 export default function EnrollTrainingModal({ gap, employees = [], onClose, onConfirmEnroll }) {
   const [selectedEmpId, setSelectedEmpId] = useState(gap?.eligibleEmployees?.[0] || employees[0]?.id || 'E001');
@@ -50,11 +51,46 @@ export default function EnrollTrainingModal({ gap, employees = [], onClose, onCo
             <>
               {/* Course Overview Card */}
               <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
-                <div style={{ fontSize: '0.96rem', fontWeight: '700', color: '#0f172a' }}>
-                  {gap?.suggestedTraining}
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
-                  Provider: {gap?.courseProvider || 'Certified Cloud Native Academy'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.96rem', fontWeight: '700', color: '#0f172a' }}>
+                      {gap?.suggestedTraining}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                      Provider: {gap?.courseProvider || 'Certified Cloud Native Academy'}
+                    </div>
+                  </div>
+                  <a
+                    href={getCourseUrl(gap?.skill, gap?.suggestedTraining)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open interactive course in a new tab"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '6px 12px',
+                      backgroundColor: '#eff6ff',
+                      color: '#1d4ed8',
+                      borderRadius: '6px',
+                      fontSize: '0.76rem',
+                      fontWeight: '600',
+                      textDecoration: 'none',
+                      border: '1px solid #bfdbfe',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#dbeafe';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#eff6ff';
+                    }}
+                  >
+                    <BookOpen size={13} />
+                    <span>Open Course</span>
+                    <ExternalLink size={12} />
+                  </a>
                 </div>
                 <div style={{ display: 'flex', gap: '18px', marginTop: '12px', fontSize: '0.78rem', color: '#334155' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

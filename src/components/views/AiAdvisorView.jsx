@@ -166,24 +166,63 @@ connect2future`;
     setMailModalData(squadData);
   };
 
-  const handleSendAllMail = () => {
-    if (!mailModalData) return;
-    const members = mailModalData.members || [];
-    const emails = members.map(m => {
-      const emp = m.employee || m;
-      return emp.email || `${emp.name?.toLowerCase().replace(/\s+/g, '.')}@nexora-tech.example`;
-    }).filter(Boolean);
+  const ACTIVEPIECES_WEBHOOK_URL = 'https://cloud.activepieces.com/api/v1/webhooks/XRP5J5mEKL3fbLmQCDC2k';
 
-    const mailtoUrl = `mailto:${emails.join(',')}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    
-    // Open native mail client
-    window.open(mailtoUrl, '_blank');
-    
-    // Close modal and show animated toast
-    const count = emails.length;
+  const handleSendActivepiecesMail = (squadData, selectedEmployee = null) => {
+    if (!squadData) return;
+    const members = squadData.members || [];
+    const project = squadData.project || { name: 'SME App' };
+
+    const payload = {
+      company: 'connect2future',
+      project: project.name || 'SME App',
+      quotation: squadData.quotationDisplay || project.budget || '₹3,500,000',
+      timestamp: new Date().toISOString(),
+      event: 'team_assignment_dispatch',
+      triggeredFor: selectedEmployee ? selectedEmployee.name : 'Complete Team',
+      totalMembers: members.length,
+      subject: emailSubject || `connect2future: Project Assignment & Delivery Briefing — ${project.name || 'Project'}`,
+      body: emailBody || `Project Team Assignment & Briefing\n\nCompany: connect2future\nProject: ${project.name}\n\nAssigned Complete Team:\n${members.map(m => {
+        const e = m.employee || m;
+        return `• ${e.name} (${e.role}) — ${m.matchScore || 85}% Skill Match — ${e.email || `${e.name?.toLowerCase().replace(/\s+/g, '.')}@connect2future.com`}`;
+      }).join('\n')}\n\n100% In-House capabilities fulfilled at connect2future.`,
+      team: members.map(m => {
+        const e = m.employee || m;
+        return {
+          id: e.id,
+          name: e.name,
+          role: e.role,
+          email: e.email || `${e.name?.toLowerCase().replace(/\s+/g, '.')}@connect2future.com`,
+          department: e.department || 'Engineering',
+          matchScore: m.matchScore || 85,
+          workload: e.workload || 80,
+          skills: (e.skills || []).map(s => typeof s === 'string' ? s : s.name)
+        };
+      })
+    };
+
+    // 1. Post JSON payload to Activepieces webhook
+    try {
+      fetch(ACTIVEPIECES_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.error('Activepieces dispatch error:', err));
+    } catch (e) {
+      console.error('Webhook fetch error:', e);
+    }
+
+    // 2. Open the Activepieces webhook URL directly in a new tab as requested
+    window.open(ACTIVEPIECES_WEBHOOK_URL, '_blank');
+
+    // 3. Close modal & show confirmation toast
     setMailModalData(null);
-    setToastMessage(`✓ Email notification dispatched to all ${count} team members!`);
-    setTimeout(() => setToastMessage(null), 4000);
+    setToastMessage(`✓ Dispatched complete team details (${members.length} members) to Activepieces!`);
+    setTimeout(() => setToastMessage(null), 4500);
+  };
+
+  const handleSendAllMail = () => {
+    handleSendActivepiecesMail(mailModalData);
   };
 
   const handleSendMessage = async (textToSend = null, requestedAgentId = null) => {
@@ -807,24 +846,25 @@ connect2future`;
                                 <User size={12} /> View Profile
                               </button>
 
-                              <a
-                                href={`mailto:${emp.email || `${emp.name?.toLowerCase().replace(/\s+/g, '.')}@nexora-tech.example`}?subject=${encodeURIComponent(`Project Assignment: ${msg.structuredData.project?.name || 'Project'}`)}`}
+                              <button
+                                onClick={() => handleSendActivepiecesMail(msg.structuredData, emp)}
                                 style={{
                                   fontSize: '0.70rem',
-                                  color: '#64748b',
-                                  textDecoration: 'none',
+                                  color: '#065f46',
+                                  backgroundColor: '#ecfdf5',
+                                  border: '1px solid #a7f3d0',
+                                  borderRadius: '4px',
+                                  padding: '4px 8px',
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   gap: '4px',
-                                  padding: '3px 6px',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#ffffff',
-                                  border: '1px solid #e2e8f0'
+                                  fontWeight: '600',
+                                  cursor: 'pointer'
                                 }}
-                                title={`Send individual email to ${emp.name}`}
+                                title={`Dispatch complete team briefing via Activepieces webhook`}
                               >
-                                <Mail size={12} /> {emp.email || 'Email'}
-                              </a>
+                                <Mail size={12} color="#059669" /> Mail Team
+                              </button>
                             </div>
                           </div>
                         );
@@ -1254,21 +1294,42 @@ connect2future`;
                                     <div style={{ fontSize: '0.66rem', color: '#64748b' }}>{emp.role}</div>
                                   </div>
                                 </div>
-                                <button
-                                  onClick={() => onViewEmployee && onViewEmployee(emp)}
-                                  style={{
-                                    padding: '3px 8px',
-                                    backgroundColor: '#eff6ff',
-                                    border: '1px solid #bfdbfe',
-                                    color: '#1d4ed8',
-                                    borderRadius: '4px',
-                                    fontSize: '0.68rem',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  Profile
-                                </button>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                  <button
+                                    onClick={() => onViewEmployee && onViewEmployee(emp)}
+                                    style={{
+                                      padding: '3px 8px',
+                                      backgroundColor: '#eff6ff',
+                                      border: '1px solid #bfdbfe',
+                                      color: '#1d4ed8',
+                                      borderRadius: '4px',
+                                      fontSize: '0.68rem',
+                                      fontWeight: '600',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    Profile
+                                  </button>
+                                  <button
+                                    onClick={() => handleSendActivepiecesMail(msg.structuredData, emp)}
+                                    style={{
+                                      padding: '3px 8px',
+                                      backgroundColor: '#f0fdf4',
+                                      border: '1px solid #bbf7d0',
+                                      color: '#166534',
+                                      borderRadius: '4px',
+                                      fontSize: '0.68rem',
+                                      fontWeight: '600',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}
+                                    title="Dispatch complete team briefing to Activepieces webhook"
+                                  >
+                                    <Mail size={11} color="#059669" /> Mail Team
+                                  </button>
+                                </div>
                               </div>
                             );
                           })}
@@ -1553,11 +1614,16 @@ connect2future`;
                   <Mail size={20} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
-                    Dispatch Project Assignment Email
-                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
+                      Dispatch Project Assignment
+                    </h3>
+                    <span style={{ fontSize: '0.64rem', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
+                      Activepieces Webhook
+                    </span>
+                  </div>
                   <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0 }}>
-                    Notifying all {mailModalData.members.length} recommended team members for {mailModalData.project?.name}
+                    Triggers Activepieces workflow for complete squad ({mailModalData.members.length} members) on {mailModalData.project?.name}
                   </p>
                 </div>
               </div>
@@ -1658,21 +1724,22 @@ connect2future`;
               <button
                 onClick={handleSendAllMail}
                 style={{
-                  backgroundColor: '#1d4ed8',
+                  backgroundColor: '#059669',
                   color: '#ffffff',
                   border: 'none',
-                  padding: '8px 18px',
+                  padding: '9px 20px',
                   borderRadius: '6px',
                   fontSize: '0.82rem',
                   fontWeight: '700',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 8px rgba(29, 78, 216, 0.3)'
+                  gap: '8px',
+                  boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)'
                 }}
               >
-                <Mail size={14} /> Send Email to All ({mailModalData.members.length} Members)
+                <ExternalLink size={15} />
+                <span>Dispatch Complete Team to Activepieces</span>
               </button>
             </div>
           </div>
