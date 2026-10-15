@@ -207,6 +207,7 @@ export default function App() {
               <WorkloadView
                 employees={employees}
                 isRebalanced={isRebalanced}
+                onApplyRebalance={handleApplyRebalance}
                 onOpenRebalanceModal={() => setShowRebalanceModal(true)}
               />
             )}

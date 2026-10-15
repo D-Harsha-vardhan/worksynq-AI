@@ -1,21 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Sparkles,
-  Scale,
   CheckCircle2,
-  ArrowRight,
+  Gauge,
+  Users,
+  BarChart3,
   TrendingUp,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  ShieldCheck,
-  AlertTriangle
+  ChevronDown
 } from 'lucide-react';
-import {
-  additionalWorkloadSummary,
-  additionalRebalanceRecommendations,
-  additionalEmployeeImpact
-} from '../data/additionalWorkforceData';
 
 export default function WorkloadRebalancingCard({
   stats,
@@ -23,52 +15,22 @@ export default function WorkloadRebalancingCard({
   onOpenRebalance,
   onSelectEmployee
 }) {
-  const [showTaskDetails, setShowTaskDetails] = useState(false);
-  const [localRebalanced, setLocalRebalanced] = useState(isRebalanced);
-
-  // Sync with prop if changed from parent
-  const activeRebalanced = isRebalanced || localRebalanced;
-
-  // Use real summary metrics from Workforce_Additional_Datasets.xlsx
-  const summary = activeRebalanced
-    ? additionalWorkloadSummary.after
-    : additionalWorkloadSummary.before;
-
-  const overloadedPct = activeRebalanced ? 0 : 15;
-  const underutilizedPct = activeRebalanced ? 2 : 12;
-  const optimalPct = activeRebalanced ? 96 : 73;
-
-  // Real staff impacts from dataset
   const overutilizedStaff = [
     {
       id: 'E028',
       name: 'Divya Menon',
       role: 'Senior Data Scientist',
-      percentage: activeRebalanced ? '83%' : '125%',
-      rawLoad: activeRebalanced ? 83 : 125,
-      barWidth: activeRebalanced ? '45%' : '100%',
-      movedHours: '-17 hrs',
+      percentage: '125%',
+      barWidth: '100%',
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
     },
     {
       id: 'E001',
       name: 'Ravi Shankar',
       role: 'Lead Backend Engineer',
-      percentage: activeRebalanced ? '70%' : '118%',
-      rawLoad: activeRebalanced ? 70 : 118,
-      barWidth: activeRebalanced ? '40%' : '94%',
-      movedHours: '-19 hrs',
+      percentage: '118%',
+      barWidth: '92%',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'E003',
-      name: 'Karthik Subramanian',
-      role: 'Lead Backend Engineer',
-      percentage: activeRebalanced ? '78%' : '113%',
-      rawLoad: activeRebalanced ? 78 : 113,
-      barWidth: activeRebalanced ? '42%' : '90%',
-      movedHours: '-14 hrs',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
     }
   ];
 
@@ -77,206 +39,229 @@ export default function WorkloadRebalancingCard({
       id: 'E036',
       name: 'Zoya Ansari',
       role: 'Data Engineer',
-      percentage: activeRebalanced ? '85%' : '35%',
-      rawLoad: activeRebalanced ? 85 : 35,
-      barWidth: activeRebalanced ? '75%' : '35%',
-      receivedHours: '+20 hrs',
+      percentage: '35%',
+      barWidth: '35%',
       avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80'
     },
     {
       id: 'E002',
       name: 'Anita Rao',
       role: 'Senior Backend Engineer',
-      percentage: activeRebalanced ? '68%' : '40%',
-      rawLoad: activeRebalanced ? 68 : 40,
-      barWidth: activeRebalanced ? '60%' : '40%',
-      receivedHours: '+11 hrs',
+      percentage: '40%',
+      barWidth: '40%',
       avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'E017',
-      name: 'Nikhil Agarwal',
-      role: 'Senior DevOps Engineer',
-      percentage: activeRebalanced ? '65%' : '30%',
-      rawLoad: activeRebalanced ? 65 : 30,
-      barWidth: activeRebalanced ? '58%' : '30%',
-      receivedHours: '+14 hrs',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
     }
   ];
 
-  const handleToggleRebalance = () => {
-    if (onOpenRebalance) {
-      onOpenRebalance();
-    } else {
-      setLocalRebalanced(!localRebalanced);
-    }
-  };
+  // ==========================================
+  // PANEL 6: When Rebalanced (Success State)
+  // ==========================================
+  if (isRebalanced) {
+    return (
+      <div className="card" style={{ padding: '22px 24px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '1.08rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
+            Workload Rebalancing &amp; Allocation
+          </h3>
+          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 8px', borderRadius: '9999px', border: '1px solid #a7f3d0' }}>
+            ✓ Optimized
+          </span>
+        </div>
 
+        {/* Success Banner */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 14px',
+          backgroundColor: '#ecfdf5',
+          borderRadius: '8px',
+          border: '1px solid #a7f3d0',
+          marginBottom: '16px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle2 size={18} color="#059669" />
+            <div>
+              <div style={{ fontSize: '0.82rem', fontWeight: '800', color: '#065f46' }}>
+                Changes Applied Successfully
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#047857' }}>
+                3 transfers applied. Workload metrics updated.
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onOpenRebalance}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#065f46',
+              fontSize: '0.74rem',
+              fontWeight: '700',
+              cursor: 'pointer'
+            }}
+          >
+            View Changes &gt;
+          </button>
+        </div>
+
+        {/* Updated Workforce Overview */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#0f172a' }}>Overloaded (8%)</span>
+            <span style={{ fontSize: '0.74rem', color: '#64748b' }}>5 Engineers Overloaded</span>
+          </div>
+
+          <div style={{ display: 'flex', width: '100%', height: '8px', borderRadius: '9999px', overflow: 'hidden', backgroundColor: '#f1f5f9' }}>
+            <div style={{ width: '8%', backgroundColor: '#ea580c' }} />
+            <div style={{ width: '10%', backgroundColor: '#2563eb', marginLeft: '2px' }} />
+            <div style={{ width: '82%', backgroundColor: '#10b981', marginLeft: '2px' }} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '0.78rem', color: '#334155', fontWeight: '600' }}>
+            <span>Underutilized (10%)</span>
+            <span style={{ color: '#059669', fontWeight: '700' }}>Optimal (82%)</span>
+          </div>
+        </div>
+
+        {/* Key Improvements (3 Cards Row) */}
+        <div style={{ marginBottom: '14px' }}>
+          <div style={{ fontSize: '0.82rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
+            Key Improvements
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            <div style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Gauge size={16} color="#059669" />
+              <div>
+                <div style={{ fontSize: '0.66rem', color: '#64748b' }}>Balance improved</div>
+                <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#059669' }}>+28%</div>
+              </div>
+            </div>
+
+            <div style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Users size={16} color="#059669" />
+              <div>
+                <div style={{ fontSize: '0.66rem', color: '#64748b' }}>Overloaded</div>
+                <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#059669' }}>-4</div>
+              </div>
+            </div>
+
+            <div style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BarChart3 size={16} color="#059669" />
+              <div>
+                <div style={{ fontSize: '0.66rem', color: '#64748b' }}>Redistributed</div>
+                <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#059669' }}>104 hrs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Benefit Highlight Banner */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '10px 12px',
+          backgroundColor: '#f0fdf4',
+          borderRadius: '6px',
+          border: '1px solid #bbf7d0'
+        }}>
+          <TrendingUp size={16} color="#16a34a" style={{ flexShrink: 0 }} />
+          <div style={{ fontSize: '0.74rem', color: '#166534', lineHeight: 1.35 }}>
+            A more balanced team leads to better productivity, higher engagement and on-time project delivery.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // PANEL 1: Initial State (Overview Card)
+  // ==========================================
   return (
     <div className="card workload-rebalance-card" style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column' }}>
-      {/* Title & Live Badge */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <h3 style={{
-          fontFamily: 'var(--font-heading)',
-          fontSize: '1.08rem',
-          fontWeight: '700',
-          color: '#0f172a',
-          margin: 0
-        }}>
-          Workload Rebalancing &amp; Allocation
-        </h3>
-        {activeRebalanced && (
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: '700',
-            backgroundColor: '#ecfdf5',
-            color: '#065f46',
-            border: '1px solid #a7f3d0',
-            padding: '2px 8px',
-            borderRadius: '9999px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}>
-            <ShieldCheck size={12} color="#059669" />
-            104h Reallocated
-          </span>
-        )}
+      {/* Header Breadcrumb */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+        <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#ffffff' }} />
+        </div>
+        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0f172a' }}>Workforce Intelligence</span>
+        <span style={{ color: '#cbd5e1' }}>|</span>
+        <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Workload Rebalancing &amp; Allocation</span>
       </div>
 
-      {/* Top Metric Label */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '8px'
+      {/* Title */}
+      <h3 style={{
+        fontFamily: 'var(--font-heading)',
+        fontSize: '1.08rem',
+        fontWeight: '700',
+        color: '#0f172a',
+        margin: '0 0 12px 0'
       }}>
-        <span style={{
-          fontSize: '0.84rem',
-          fontWeight: '700',
-          color: activeRebalanced ? '#059669' : '#0f172a'
-        }}>
-          Overloaded ({overloadedPct}%)
-        </span>
-        <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-          {activeRebalanced ? '0 Burnout Bottlenecks' : '9 Engineers Overloaded'}
-        </span>
-      </div>
+        Workload Rebalancing &amp; Allocation
+      </h3>
 
       {/* Multi-segment Progress Bar */}
-      <div style={{
-        display: 'flex',
-        width: '100%',
-        height: '10px',
-        borderRadius: '9999px',
-        overflow: 'hidden',
-        backgroundColor: '#f1f5f9',
-        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06)'
-      }}>
-        <div
-          style={{
-            width: `${overloadedPct}%`,
-            backgroundColor: '#ea580c',
-            transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
-          title={`Overloaded: ${overloadedPct}%`}
-        />
-        <div
-          style={{
-            width: `${underutilizedPct}%`,
-            backgroundColor: '#2563eb',
-            marginLeft: '2px',
-            transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
-          title={`Underutilized: ${underutilizedPct}%`}
-        />
-        <div
-          style={{
-            width: `${optimalPct}%`,
-            backgroundColor: '#10b981',
-            marginLeft: '2px',
-            transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
-          title={`Optimal: ${optimalPct}%`}
-        />
-      </div>
+      <div style={{ marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#0f172a' }}>
+            Overloaded (15%)
+          </span>
+          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+            9 Engineers Overloaded
+          </span>
+        </div>
 
-      {/* Bottom Metric Labels */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: '8px',
-        fontSize: '0.82rem',
-        color: '#334155',
-        fontWeight: '600'
-      }}>
-        <span>Underutilized ({underutilizedPct}%)</span>
-        <span style={{ color: activeRebalanced ? '#059669' : '#334155', fontWeight: activeRebalanced ? '700' : '600' }}>
-          Optimal ({optimalPct}%)
-        </span>
+        <div style={{ display: 'flex', width: '100%', height: '8px', borderRadius: '9999px', overflow: 'hidden', backgroundColor: '#f1f5f9' }}>
+          <div style={{ width: '15%', backgroundColor: '#ea580c' }} title="Overloaded (15%)" />
+          <div style={{ width: '12%', backgroundColor: '#2563eb', marginLeft: '2px' }} title="Underutilized (12%)" />
+          <div style={{ width: '73%', backgroundColor: '#10b981', marginLeft: '2px' }} title="Optimal (73%)" />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '0.8rem', color: '#334155', fontWeight: '600' }}>
+          <span>Underutilized (12%)</span>
+          <span>Optimal (73%)</span>
+        </div>
       </div>
 
       {/* Primary Auto-Rebalance Tasks Button */}
       <button
         className="btn-auto-rebalance"
-        onClick={handleToggleRebalance}
+        onClick={onOpenRebalance}
         style={{
           width: '100%',
-          marginTop: '16px',
-          marginBottom: '16px',
-          padding: '11px 18px',
-          backgroundColor: activeRebalanced ? '#059669' : '#1d4ed8',
+          marginTop: '6px',
+          marginBottom: '14px',
+          padding: '10px 18px',
+          backgroundColor: '#2563eb',
           color: '#ffffff',
           border: 'none',
           borderRadius: '8px',
-          fontSize: '0.9rem',
+          fontSize: '0.88rem',
           fontWeight: '600',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
-          boxShadow: activeRebalanced
-            ? '0 2px 8px rgba(5, 150, 105, 0.28)'
-            : '0 2px 8px rgba(29, 78, 216, 0.28)',
+          boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
           transition: 'all 0.18s ease'
         }}
-        title="Execute intelligent task reallocation simulation"
       >
-        {activeRebalanced ? (
-          <>
-            <CheckCircle2 size={16} />
-            <span>✓ Rebalance Applied (104h Shifted)</span>
-          </>
-        ) : (
-          <>
-            <span>Auto-Rebalance Tasks</span>
-            <span style={{ fontSize: '1rem', lineHeight: 1 }}>✨</span>
-          </>
-        )}
+        <Sparkles size={16} />
+        <span>Auto-Rebalance Tasks</span>
       </button>
 
       {/* Over-utilized staff section */}
       <div style={{ marginBottom: '14px' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontSize: '0.82rem',
-          fontWeight: '700',
-          color: '#0f172a',
-          marginBottom: '8px'
-        }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
           <span>Over-utilized staff</span>
-          <span style={{ fontSize: '0.72rem', color: activeRebalanced ? '#059669' : '#ea580c', fontWeight: '600' }}>
-            {activeRebalanced ? 'Protected from Burnout' : 'At Risk (>100% Load)'}
-          </span>
+          <span style={{ fontSize: '0.72rem', color: '#ea580c', fontWeight: '600' }}>At Risk (&gt;100% Load)</span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {overutilizedStaff.slice(0, 2).map(emp => (
+          {overutilizedStaff.map(emp => (
             <div
               key={emp.id}
               onClick={() => onSelectEmployee && onSelectEmployee(emp)}
@@ -292,42 +277,19 @@ export default function WorkloadRebalancingCard({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img
-                  src={emp.avatar}
-                  alt={emp.name}
-                  style={{
-                    width: '26px',
-                    height: '26px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '1px solid #e2e8f0'
-                  }}
-                />
+                <img src={emp.avatar} alt={emp.name} style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }} />
                 <div>
                   <div style={{ fontSize: '0.8rem', fontWeight: '600', color: '#1e293b' }}>
                     {emp.name} ({emp.percentage})
                   </div>
                   <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                    {emp.role} {activeRebalanced && <span style={{ color: '#059669', fontWeight: '700' }}>({emp.movedHours})</span>}
+                    {emp.role}
                   </div>
                 </div>
               </div>
 
-              {/* Mini Progress Track */}
-              <div style={{
-                width: '74px',
-                height: '7px',
-                backgroundColor: '#f1f5f9',
-                borderRadius: '9999px',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  width: emp.barWidth,
-                  height: '100%',
-                  backgroundColor: activeRebalanced ? '#10b981' : '#ea580c',
-                  borderRadius: '9999px',
-                  transition: 'width 0.4s ease'
-                }} />
+              <div style={{ width: '74px', height: '7px', backgroundColor: '#f1f5f9', borderRadius: '9999px', overflow: 'hidden' }}>
+                <div style={{ width: emp.barWidth, height: '100%', backgroundColor: '#ea580c', borderRadius: '9999px' }} />
               </div>
             </div>
           ))}
@@ -335,24 +297,14 @@ export default function WorkloadRebalancingCard({
       </div>
 
       {/* Under-utilized staff section */}
-      <div>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontSize: '0.82rem',
-          fontWeight: '700',
-          color: '#0f172a',
-          marginBottom: '8px'
-        }}>
+      <div style={{ marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
           <span>Under-utilized staff</span>
-          <span style={{ fontSize: '0.72rem', color: activeRebalanced ? '#059669' : '#2563eb', fontWeight: '600' }}>
-            {activeRebalanced ? 'Productively Allocated' : 'Available Bandwidth'}
-          </span>
+          <span style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: '600' }}>Available Bandwidth</span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {underutilizedStaff.slice(0, 2).map(emp => (
+          {underutilizedStaff.map(emp => (
             <div
               key={emp.id}
               onClick={() => onSelectEmployee && onSelectEmployee(emp)}
@@ -368,105 +320,45 @@ export default function WorkloadRebalancingCard({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img
-                  src={emp.avatar}
-                  alt={emp.name}
-                  style={{
-                    width: '26px',
-                    height: '26px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '1px solid #e2e8f0'
-                  }}
-                />
+                <img src={emp.avatar} alt={emp.name} style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }} />
                 <div>
                   <div style={{ fontSize: '0.8rem', fontWeight: '600', color: '#1e293b' }}>
                     {emp.name} ({emp.percentage})
                   </div>
                   <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                    {emp.role} {activeRebalanced && <span style={{ color: '#059669', fontWeight: '700' }}>({emp.receivedHours})</span>}
+                    {emp.role}
                   </div>
                 </div>
               </div>
 
-              {/* Mini Progress Track */}
-              <div style={{
-                width: '74px',
-                height: '7px',
-                backgroundColor: '#f1f5f9',
-                borderRadius: '9999px',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  width: emp.barWidth,
-                  height: '100%',
-                  backgroundColor: '#10b981',
-                  borderRadius: '9999px',
-                  transition: 'width 0.4s ease'
-                }} />
+              <div style={{ width: '74px', height: '7px', backgroundColor: '#f1f5f9', borderRadius: '9999px', overflow: 'hidden' }}>
+                <div style={{ width: emp.barWidth, height: '100%', backgroundColor: '#10b981', borderRadius: '9999px' }} />
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Expandable Task Transfers Toggle */}
-      <div style={{ marginTop: '14px', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+      {/* Bottom Link to Proposals */}
+      <div style={{ marginTop: 'auto', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
         <button
-          onClick={() => setShowTaskDetails(!showTaskDetails)}
+          onClick={onOpenRebalance}
           style={{
-            width: '100%',
             background: 'none',
             border: 'none',
-            padding: '4px 0',
-            fontSize: '0.74rem',
-            color: '#4f46e5',
+            padding: 0,
+            fontSize: '0.76rem',
+            color: '#2563eb',
             fontWeight: '600',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            gap: '4px'
           }}
         >
-          <span>{showTaskDetails ? 'Hide' : 'View'} 10 Proposed Task Reallocations (104 hrs)</span>
-          {showTaskDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          <span>View 10 Proposed Task Reallocations (104 hrs)</span>
+          <ChevronDown size={14} />
         </button>
-
-        {showTaskDetails && (
-          <div style={{
-            marginTop: '8px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '6px',
-            maxHeight: '180px',
-            overflowY: 'auto',
-            paddingRight: '4px'
-          }}>
-            {additionalRebalanceRecommendations.map(r => (
-              <div
-                key={r.id}
-                style={{
-                  padding: '6px 8px',
-                  backgroundColor: '#f8fafc',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '0.72rem'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#0f172a' }}>
-                  <span>{r.taskName} ({r.hoursMoved}h)</span>
-                  <span style={{ color: '#059669' }}>{r.matchScore}% Match</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#475569', marginTop: '2px' }}>
-                  <span style={{ color: '#dc2626' }}>{r.fromName}</span>
-                  <ArrowRight size={10} />
-                  <span style={{ color: '#15803d' }}>{r.toName}</span>
-                  <span style={{ marginLeft: 'auto', color: '#64748b' }}>{r.skillName}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
