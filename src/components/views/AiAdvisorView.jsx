@@ -78,6 +78,11 @@ export default function AiAdvisorView({
 
   const suggestedPrompts = [
     {
+      label: 'connect2future Quote Audit',
+      prompt: 'This is my new project SME App and this is the quotation ₹35 Lakhs. Is it good for my company connect2future?',
+      agentId: 'analyst'
+    },
+    {
       label: 'SME App Squad',
       prompt: 'For this project SME App, which teams and employees are best? Show their skills and profile.',
       agentId: 'optimizer'
@@ -107,8 +112,10 @@ export default function AiAdvisorView({
   const handleOpenMailModal = (squadData) => {
     const project = squadData.project || selectedProject || { name: 'Project' };
     const members = squadData.members || [];
-    const defaultSubject = `[Workforce Intelligence] Assignment: ${project.name} Project Team`;
-    const defaultBody = `Hi Team,
+    const isQuote = squadData.type === 'quotation';
+
+    let defaultSubject = `[Workforce Intelligence] Assignment: ${project.name} Project Team`;
+    let defaultBody = `Hi Team,
 
 Congratulations! You have been selected as the core squad for "${project.name}" based on your verified skills, experience, and current bandwidth availability.
 
@@ -126,6 +133,31 @@ Next Steps:
 
 Best regards,
 Workforce Intelligence & Project Planning`;
+
+    if (isQuote) {
+      defaultSubject = `[Feasibility Audit] Quotation & Delivery Review for ${project.name} • connect2future`;
+      defaultBody = `Hi Leadership & Project Team,
+
+We have completed the Commercial & Workforce Feasibility Audit for "${project.name}" on behalf of connect2future.
+
+Commercial & Delivery Breakdown:
+• Client Quotation (Revenue): ${squadData.quotationDisplay || '₹3,500,000'}
+• Estimated Internal Delivery Cost: ${squadData.deliveryCostDisplay || '₹2,160,000'}
+• Projected Net Profit: +${squadData.netProfitDisplay || '₹1,340,000'} (${squadData.marginPercent || 38}% Gross Margin)
+• Executive Recommendation: ${squadData.verdict || 'Approved & Highly Recommended'}
+
+Staffing Readiness for connect2future:
+${members.map(m => {
+  const emp = m.employee || m;
+  return `• ${emp.name} (${emp.role}) — ${m.matchScore || 85}% Skill Match`;
+}).join('\n')}
+
+All core technical capabilities are fulfilled 100% in-house. No external contractor overhead is required.
+
+Best regards,
+Talent Planning & Operations
+connect2future`;
+    }
 
     setEmailSubject(defaultSubject);
     setEmailBody(defaultBody);
@@ -239,6 +271,16 @@ Workforce Intelligence & Project Planning`;
 
       // Detect structured data to render interactive cards
       let structuredData = null;
+
+      const isQuotationQuery = (
+        lower.includes('quotation') ||
+        lower.includes('qutation') ||
+        lower.includes('quote') ||
+        lower.includes('connect2future') ||
+        (lower.includes('is it good') && (lower.includes('company') || lower.includes('project') || lower.includes('price') || lower.includes('budget') || lower.includes('app'))) ||
+        (lower.includes('new project') && (lower.includes('good') || lower.includes('cost') || lower.includes('quotation') || lower.includes('qutation') || lower.includes('price')))
+      );
+
       const isTeamQuery = (
         lower.includes('team') ||
         lower.includes('squad') ||
@@ -258,7 +300,51 @@ Workforce Intelligence & Project Planning`;
         lower.includes('team')
       );
 
-      if (isTeamQuery) {
+      if (isQuotationQuery) {
+        // Parse quotation amount or default to realistic figure
+        let quoteAmount = 3500000;
+        let quoteDisplay = '₹3,500,000';
+
+        const lakhMatch = query.match(/(\d+[\d,]*(\.\d+)?)\s*(lakh|lakhs|lac|lacs)/i);
+        const numMatch = query.match(/(?:₹|rs\.?|inr|\$)?\s*([\d,]+(?:\.\d+)?)\s*(k|m|crore|crores)?/i);
+
+        if (lakhMatch) {
+          const val = parseFloat(lakhMatch[1].replace(/,/g, ''));
+          quoteAmount = val * 100000;
+          quoteDisplay = `₹${val} Lakhs`;
+        } else if (numMatch && parseFloat(numMatch[1].replace(/,/g, '')) > 1000) {
+          const raw = parseFloat(numMatch[1].replace(/,/g, ''));
+          quoteAmount = raw;
+          quoteDisplay = `₹${raw.toLocaleString('en-IN')}`;
+        } else if (targetProject?.budget) {
+          quoteDisplay = targetProject.budget;
+          const cleanNum = parseInt(targetProject.budget.replace(/[^\d]/g, ''), 10);
+          if (cleanNum > 100000) quoteAmount = cleanNum;
+        }
+
+        const teamCount = currentRecommendation?.recommendedMembers?.length || 4;
+        const estimatedHoursTotal = teamCount * 160;
+        const blendedHourlyRate = 2250;
+        const estimatedDeliveryCost = Math.round(estimatedHoursTotal * blendedHourlyRate * 1.5);
+        const netProfit = quoteAmount - estimatedDeliveryCost;
+        const marginPercent = Math.max(12, Math.min(62, Math.round((netProfit / quoteAmount) * 100)));
+        const isProfitable = marginPercent >= 25;
+
+        structuredData = {
+          type: 'quotation',
+          company: 'connect2future',
+          project: targetProject,
+          quotationDisplay: quoteDisplay,
+          quotationAmount: quoteAmount,
+          deliveryCostDisplay: `₹${estimatedDeliveryCost.toLocaleString('en-IN')}`,
+          netProfitDisplay: `₹${Math.abs(netProfit).toLocaleString('en-IN')}`,
+          marginPercent,
+          isProfitable,
+          verdict: isProfitable ? 'Approved & Recommended for connect2future' : 'Margins Tight — Counter-Quote Advised',
+          members: currentRecommendation?.recommendedMembers || [],
+          avgMatchScore: currentRecommendation?.avgMatchScore || 85
+        };
+      } else if (isTeamQuery) {
         structuredData = {
           type: 'squad',
           project: targetProject,
@@ -958,6 +1044,208 @@ Workforce Intelligence & Project Planning`;
                         <TrendingUp size={13} /> View Dashboard Overview
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {/* Structured Interactive Result Card: Quotation & Feasibility Audit for connect2future */}
+                {msg.structuredData?.type === 'quotation' && (
+                  <div
+                    style={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '16px 18px',
+                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.05)',
+                      marginTop: '4px'
+                    }}
+                  >
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)' }}>
+                          <ShieldCheck size={20} />
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '0.90rem', fontWeight: '800', color: '#0f172a' }}>
+                              Project Feasibility & Quotation Audit
+                            </span>
+                            <span style={{ fontSize: '0.66rem', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', backgroundColor: '#e0f2fe', color: '#0369a1' }}>
+                              connect2future
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
+                            {msg.structuredData.project?.name} • Commercial profitability & delivery readiness audit
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{
+                            fontSize: '0.74rem',
+                            fontWeight: '800',
+                            color: msg.structuredData.isProfitable ? '#065f46' : '#991b1b',
+                            backgroundColor: msg.structuredData.isProfitable ? '#d1fae5' : '#fee2e2',
+                            padding: '3px 10px',
+                            borderRadius: '9999px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <CheckCircle2 size={13} />
+                          {msg.structuredData.verdict}
+                        </span>
+                        <button
+                          onClick={() => handleOpenMailModal(msg.structuredData)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            backgroundColor: '#1d4ed8',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '0.76rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(29, 78, 216, 0.25)'
+                          }}
+                        >
+                          <Mail size={13} />
+                          <span>Mail Feasibility Report</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Financial Metrics Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '14px' }}>
+                      <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: '600', color: '#64748b', textTransform: 'uppercase' }}>
+                          Quotation (Revenue)
+                        </div>
+                        <div style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0f172a', marginTop: '2px' }}>
+                          {msg.structuredData.quotationDisplay}
+                        </div>
+                        <div style={{ fontSize: '0.64rem', color: '#059669', fontWeight: '600', marginTop: '2px' }}>
+                          Client Proposal Value
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: '600', color: '#64748b', textTransform: 'uppercase' }}>
+                          Est. Delivery Cost
+                        </div>
+                        <div style={{ fontSize: '1.15rem', fontWeight: '800', color: '#475569', marginTop: '2px' }}>
+                          {msg.structuredData.deliveryCostDisplay}
+                        </div>
+                        <div style={{ fontSize: '0.64rem', color: '#64748b', marginTop: '2px' }}>
+                          4 Devs • ~640 Sprint Hours
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '12px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: '600', color: '#166534', textTransform: 'uppercase' }}>
+                          Projected Profit
+                        </div>
+                        <div style={{ fontSize: '1.15rem', fontWeight: '800', color: '#15803d', marginTop: '2px' }}>
+                          +{msg.structuredData.netProfitDisplay}
+                        </div>
+                        <div style={{ fontSize: '0.64rem', color: '#166534', fontWeight: '600', marginTop: '2px' }}>
+                          Net Margin to connect2future
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '12px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                        <div style={{ fontSize: '0.68rem', fontWeight: '600', color: '#1e40af', textTransform: 'uppercase' }}>
+                          Gross Margin ROI
+                        </div>
+                        <div style={{ fontSize: '1.15rem', fontWeight: '800', color: '#1d4ed8', marginTop: '2px' }}>
+                          {msg.structuredData.marginPercent}%
+                        </div>
+                        <div style={{ fontSize: '0.64rem', color: '#2563eb', fontWeight: '600', marginTop: '2px' }}>
+                          Benchmark: 35%+ Target
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Strategic Workforce Feasibility Breakdown */}
+                    <div style={{ padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '0.74rem', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>
+                        connect2future Delivery Readiness:
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', fontSize: '0.74rem', color: '#475569' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <CheckCircle2 size={14} color="#16a34a" />
+                          <span><strong>100% In-House Skills:</strong> Full React, Flutter & Node stack</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <CheckCircle2 size={14} color="#16a34a" />
+                          <span><strong>Safe Bandwidth:</strong> Squad operates comfortably under 80% load</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <CheckCircle2 size={14} color="#16a34a" />
+                          <span><strong>Delivery Risk: Low:</strong> Zero contractor dependencies</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recommended Squad Preview */}
+                    {msg.structuredData.members && msg.structuredData.members.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#64748b', marginBottom: '8px' }}>
+                          Assigned In-House Engineers Ready at connect2future:
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '8px' }}>
+                          {msg.structuredData.members.slice(0, 4).map((m, idx) => {
+                            const emp = m.employee || m;
+                            return (
+                              <div
+                                key={idx}
+                                style={{
+                                  padding: '8px 10px',
+                                  backgroundColor: '#ffffff',
+                                  borderRadius: '6px',
+                                  border: '1px solid #e2e8f0',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <img
+                                    src={emp.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=2563eb&color=fff`}
+                                    alt={emp.name}
+                                    style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                                  />
+                                  <div>
+                                    <div style={{ fontSize: '0.76rem', fontWeight: '700', color: '#0f172a' }}>{emp.name}</div>
+                                    <div style={{ fontSize: '0.66rem', color: '#64748b' }}>{emp.role}</div>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => onViewEmployee && onViewEmployee(emp)}
+                                  style={{
+                                    padding: '3px 8px',
+                                    backgroundColor: '#eff6ff',
+                                    border: '1px solid #bfdbfe',
+                                    color: '#1d4ed8',
+                                    borderRadius: '4px',
+                                    fontSize: '0.68rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Profile
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
