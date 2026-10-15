@@ -32,7 +32,7 @@ export default function AiAssistantPanel({
     {
       id: 1,
       sender: 'system',
-      text: "Hello! I'm your Workforce Intelligence Assistant powered by NVIDIA NIM. Ask me about optimal project squads, workload rebalancing, skill bottlenecks, or training pathways."
+      text: "Hello! I'm your Workforce Intelligence Assistant. Ask me about optimal project squads, workload rebalancing, skill bottlenecks, or training pathways."
     }
   ]);
 
@@ -113,21 +113,21 @@ export default function AiAssistantPanel({
           </div>
           <div>
             <div className="ai-title">AI Assistant</div>
-            <div style={{ fontSize: '0.66rem', color: '#64748b' }}>NVIDIA NIM Microservice</div>
+            <div style={{ fontSize: '0.66rem', color: '#64748b' }}>AI Intelligence Service</div>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span
             className="ai-status-pill"
             style={{
-              backgroundColor: 'rgba(118, 185, 0, 0.12)',
-              color: '#365f00',
-              border: '1px solid rgba(118, 185, 0, 0.4)'
+              backgroundColor: '#dcfce7',
+              color: '#15803d',
+              border: '1px solid #bbf7d0'
             }}
-            title="Connected to NVIDIA NIM API (DiffusionGemma-26B)"
+            title="Connected to AI Intelligence Service"
           >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#76b900' }}></span>
-            NVIDIA NIM • Live
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
+            AI Copilot • Live
           </span>
           {onClose && (
             <button
@@ -223,11 +223,8 @@ export default function AiAssistantPanel({
             ) : (
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '700', marginBottom: '4px', color: '#166534' }}>
-                  <Cpu size={12} color="#76b900" />
-                  <span>NVIDIA NIM Copilot:</span>
-                  <span style={{ fontSize: '0.62rem', backgroundColor: 'rgba(118, 185, 0, 0.15)', color: '#3f6c00', padding: '1px 5px', borderRadius: '4px' }}>
-                    DiffusionGemma
-                  </span>
+                  <Cpu size={12} color="#2563eb" />
+                  <span>AI Copilot:</span>
                 </div>
                 <div>{msg.text}</div>
               </div>
@@ -252,8 +249,8 @@ export default function AiAssistantPanel({
               alignSelf: 'flex-start'
             }}
           >
-            <Loader2 size={14} className="spin-animation" color="#76b900" />
-            <span>NVIDIA NIM is reasoning...</span>
+            <Loader2 size={14} className="spin-animation" color="#2563eb" />
+            <span>Thinking...</span>
           </div>
         )}
       </div>
@@ -270,7 +267,7 @@ export default function AiAssistantPanel({
           <input
             type="text"
             className="ai-text-input"
-            placeholder={isGenerating ? "NVIDIA AI is thinking..." : "Ask a question..."}
+            placeholder={isGenerating ? "Thinking..." : "Ask a question..."}
             value={inputText}
             disabled={isGenerating}
             onChange={(e) => setInputText(e.target.value)}
