@@ -52,6 +52,8 @@ export default function AiAdvisorView({
   const [toastMessage, setToastMessage] = useState(null);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
+  const [loadingSecondsLeft, setLoadingSecondsLeft] = useState(25);
+  const [loadingStageText, setLoadingStageText] = useState('Initializing NVIDIA NIM deep reasoning engine...');
 
   const scrollToBottom = () => {
     if (chatScrollRef.current) {
@@ -258,16 +260,42 @@ connect2future`;
       currentRecommendation = recommendOptimalTeam(targetProject, employees, targetProject.teamSize || 4);
     }
 
-    try {
-      const responseText = await askNvidiaAssistant({
-        prompt: query,
-        agentId: activeAgentId,
-        project: targetProject,
-        recommendation: currentRecommendation,
-        workloadStats,
-        skillGaps,
-        history: messages
+    // 25-second deep reasoning simulation timer as requested
+    setLoadingSecondsLeft(25);
+    setLoadingStageText('Connecting to NVIDIA NIM llama-3.1-70b-instruct cluster...');
+
+    let timerInterval = null;
+    timerInterval = setInterval(() => {
+      setLoadingSecondsLeft(prev => {
+        const next = prev - 1;
+        if (next <= 5) {
+          setLoadingStageText('Synthesizing final executive briefing & team recommendation payload...');
+        } else if (next <= 10) {
+          setLoadingStageText('Auditing financial feasibility, margins & commercial profit ROI for connect2future...');
+        } else if (next <= 15) {
+          setLoadingStageText('Evaluating project delivery milestones, sprint effort & capacity buffers...');
+        } else if (next <= 20) {
+          setLoadingStageText('Scanning connect2future talent pool & active employee skill matrix...');
+        }
+        return Math.max(0, next);
       });
+    }, 1000);
+
+    const delayPromise = new Promise(resolve => setTimeout(resolve, 25000));
+
+    try {
+      const [responseText] = await Promise.all([
+        askNvidiaAssistant({
+          prompt: query,
+          agentId: activeAgentId,
+          project: targetProject,
+          recommendation: currentRecommendation,
+          workloadStats,
+          skillGaps,
+          history: messages
+        }),
+        delayPromise
+      ]);
 
       // Detect structured data to render interactive cards
       let structuredData = null;
@@ -396,6 +424,7 @@ connect2future`;
         }
       ]);
     } finally {
+      if (timerInterval) clearInterval(timerInterval);
       setIsGenerating(false);
     }
   };
@@ -1278,19 +1307,58 @@ connect2future`;
               </div>
               <div
                 style={{
-                  padding: '12px 16px',
+                  padding: '14px 18px',
                   borderRadius: '12px',
                   fontSize: '0.82rem',
-                  backgroundColor: '#f8fafc',
+                  backgroundColor: '#ffffff',
                   border: '1px solid #cbd5e1',
-                  color: '#334155',
+                  color: '#1e293b',
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                  flexDirection: 'column',
+                  gap: '10px',
+                  minWidth: '340px',
+                  maxWidth: '520px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                 }}
               >
-                <Loader2 size={16} className="spin-animation" color="#16a34a" />
-                <span>NVIDIA NIM is reasoning across real organization data...</span>
+                {/* Header with spinner and countdown */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#0f172a' }}>
+                    <Loader2 size={16} className="spin-animation" color="#2563eb" />
+                    <span>NVIDIA NIM Deep Reasoning</span>
+                  </div>
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: '700',
+                    color: '#2563eb',
+                    backgroundColor: '#eff6ff',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    border: '1px solid #bfdbfe',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    ⏱️ {loadingSecondsLeft}s remaining
+                  </span>
+                </div>
+
+                {/* Progress Bar Track */}
+                <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f5f9', borderRadius: '9999px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      width: `${Math.min(100, Math.round(((25 - loadingSecondsLeft) / 25) * 100))}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #2563eb 0%, #10b981 100%)',
+                      borderRadius: '9999px',
+                      transition: 'width 1s linear'
+                    }}
+                  />
+                </div>
+
+                {/* Dynamic stage description */}
+                <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={12} color="#10b981" style={{ flexShrink: 0 }} />
+                  <span>{loadingStageText}</span>
+                </div>
               </div>
             </div>
           )}
