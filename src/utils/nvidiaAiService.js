@@ -2,7 +2,7 @@
 // Powered by NVIDIA API Catalog: google/diffusiongemma-26b-a4b-it
 // Seamlessly integrated via Vite proxy to eliminate browser CORS
 
-const NVIDIA_API_KEY = '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';
+const NVIDIA_API_KEY = import.meta.env.VITE_NVIDIA_API_KEY || '';
 const NVIDIA_MODEL = 'google/diffusiongemma-26b-a4b-it';
 
 // Endpoint handles both proxy and direct fallback
