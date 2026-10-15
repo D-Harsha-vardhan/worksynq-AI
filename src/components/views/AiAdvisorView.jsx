@@ -52,7 +52,7 @@ export default function AiAdvisorView({
   const [toastMessage, setToastMessage] = useState(null);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
-  const [loadingSecondsLeft, setLoadingSecondsLeft] = useState(25);
+  const [loadingSecondsLeft, setLoadingSecondsLeft] = useState(10);
   const [loadingStageText, setLoadingStageText] = useState('Analyzing workforce data & capabilities...');
 
   const scrollToBottom = () => {
@@ -299,28 +299,28 @@ connect2future`;
       currentRecommendation = recommendOptimalTeam(targetProject, employees, targetProject.teamSize || 4);
     }
 
-    // 25-second progressive reasoning simulation
-    setLoadingSecondsLeft(25);
+    // 10-second progressive reasoning simulation
+    setLoadingSecondsLeft(10);
     setLoadingStageText('Analyzing requirements & talent capabilities...');
 
     let timerInterval = null;
     timerInterval = setInterval(() => {
       setLoadingSecondsLeft(prev => {
         const next = prev - 1;
-        if (next <= 5) {
+        if (next <= 2) {
           setLoadingStageText('Synthesizing executive briefing & team recommendation payload...');
-        } else if (next <= 10) {
-          setLoadingStageText('Auditing financial feasibility, margins & commercial profit ROI for connect2future...');
-        } else if (next <= 15) {
-          setLoadingStageText('Evaluating project delivery milestones, sprint effort & capacity buffers...');
-        } else if (next <= 20) {
+        } else if (next <= 4) {
+          setLoadingStageText('Auditing financial feasibility, margins & commercial profit ROI...');
+        } else if (next <= 6) {
+          setLoadingStageText('Evaluating project delivery milestones & capacity buffers...');
+        } else if (next <= 8) {
           setLoadingStageText('Scanning talent pool & active employee skill matrix...');
         }
         return Math.max(0, next);
       });
     }, 1000);
 
-    const delayPromise = new Promise(resolve => setTimeout(resolve, 25000));
+    const delayPromise = new Promise(resolve => setTimeout(resolve, 10000));
 
     try {
       const [responseText] = await Promise.all([
@@ -1392,7 +1392,7 @@ connect2future`;
                 <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f5f9', borderRadius: '9999px', overflow: 'hidden' }}>
                   <div
                     style={{
-                      width: `${Math.min(100, Math.round(((25 - loadingSecondsLeft) / 25) * 100))}%`,
+                      width: `${Math.min(100, Math.round(((10 - loadingSecondsLeft) / 10) * 100))}%`,
                       height: '100%',
                       background: 'linear-gradient(90deg, #2563eb 0%, #10b981 100%)',
                       borderRadius: '9999px',
