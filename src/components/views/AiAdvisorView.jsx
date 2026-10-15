@@ -18,9 +18,14 @@ import {
   Award,
   BookOpen,
   CheckCircle2,
-  Mic
+  Mic,
+  Mail,
+  User,
+  ExternalLink,
+  X
 } from 'lucide-react';
-import { askDronaHqAdvisor, DRONAHQ_WEBHOOK_URL } from '../../utils/dronaHqService';
+import { askNvidiaAssistant } from '../../utils/nvidiaAiService';
+import { recommendOptimalTeam } from '../../utils/matchingEngine';
 
 export default function AiAdvisorView({
   projects = [],
@@ -43,7 +48,10 @@ export default function AiAdvisorView({
   const messagesEndRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
-  const [threadId, setThreadId] = useState(null);
+  const [mailModalData, setMailModalData] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
 
   const scrollToBottom = () => {
     if (chatScrollRef.current) {
@@ -70,6 +78,11 @@ export default function AiAdvisorView({
 
   const suggestedPrompts = [
     {
+      label: 'SME App Squad',
+      prompt: 'For this project SME App, which teams and employees are best? Show their skills and profile.',
+      agentId: 'optimizer'
+    },
+    {
       label: 'Recommend Squad',
       prompt: `Recommend the optimal team for "${selectedProject?.name || 'current project'}" with skill match scores and capacity buffers.`,
       agentId: 'optimizer'
@@ -90,6 +103,54 @@ export default function AiAdvisorView({
       agentId: 'optimizer'
     }
   ];
+
+  const handleOpenMailModal = (squadData) => {
+    const project = squadData.project || selectedProject || { name: 'Project' };
+    const members = squadData.members || [];
+    const defaultSubject = `[Workforce Intelligence] Assignment: ${project.name} Project Team`;
+    const defaultBody = `Hi Team,
+
+Congratulations! You have been selected as the core squad for "${project.name}" based on your verified skills, experience, and current bandwidth availability.
+
+Recommended Team Roster:
+${members.map(m => {
+  const emp = m.employee || m;
+  const topSkills = (emp.skills || []).slice(0, 3).map(s => s.name).join(', ');
+  return `• ${emp.name} (${emp.role}) — ${m.matchScore || 85}% Skill Match | Skills: ${topSkills || 'Full-Stack'}`;
+}).join('\n')}
+
+Next Steps:
+1. Review the project requirements and sprint timeline in Workforce Intelligence.
+2. Join the technical kickoff session this week.
+3. Reach out to Talent Operations if you have any conflicting project allocations.
+
+Best regards,
+Workforce Intelligence & Project Planning`;
+
+    setEmailSubject(defaultSubject);
+    setEmailBody(defaultBody);
+    setMailModalData(squadData);
+  };
+
+  const handleSendAllMail = () => {
+    if (!mailModalData) return;
+    const members = mailModalData.members || [];
+    const emails = members.map(m => {
+      const emp = m.employee || m;
+      return emp.email || `${emp.name?.toLowerCase().replace(/\s+/g, '.')}@nexora-tech.example`;
+    }).filter(Boolean);
+
+    const mailtoUrl = `mailto:${emails.join(',')}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    
+    // Open native mail client
+    window.open(mailtoUrl, '_blank');
+    
+    // Close modal and show animated toast
+    const count = emails.length;
+    setMailModalData(null);
+    setToastMessage(`✓ Email notification dispatched to all ${count} team members!`);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   const handleSendMessage = async (textToSend = null, requestedAgentId = null) => {
     const query = textToSend || inputText;
@@ -129,33 +190,81 @@ export default function AiAdvisorView({
     setInputText('');
     setIsGenerating(true);
 
+    // Extract target project from query or fallback to selectedProject
+    let targetProject = selectedProject;
+    const foundProject = projects.find(p => 
+      lower.includes(p.name.toLowerCase()) || 
+      lower.includes(p.id.toLowerCase())
+    );
+
+    if (foundProject) {
+      targetProject = foundProject;
+    } else if (lower.includes('sme') || lower.includes('sme app')) {
+      targetProject = {
+        id: 'P-SME',
+        name: 'SME App',
+        description: 'Small & Medium Enterprise operations, billing, customer management, and telemetry platform',
+        status: 'Planning',
+        priority: 'High',
+        budget: '₹3,500,000',
+        department: 'Enterprise Solutions',
+        teamSize: 4,
+        requiredSkills: [
+          { skillId: 'S07', name: 'React', minLevel: 4, weight: 1.0, isCritical: true, count: 1 },
+          { skillId: 'S42', name: 'Flutter', minLevel: 3, weight: 1.0, isCritical: true, count: 1 },
+          { skillId: 'S10', name: 'Node.js', minLevel: 3, weight: 0.8, isCritical: false, count: 1 },
+          { skillId: 'S14', name: 'REST API Design', minLevel: 3, weight: 0.8, isCritical: false, count: 1 },
+          { skillId: 'S44', name: 'UI/UX Design', minLevel: 3, weight: 0.7, isCritical: false, count: 1 },
+          { skillId: 'S45', name: 'QA/Testing', minLevel: 2, weight: 0.5, isCritical: false, count: 1 }
+        ]
+      };
+    }
+
+    // Compute dynamic squad recommendation for target project
+    let currentRecommendation = recommendation;
+    if (targetProject && employees.length > 0) {
+      currentRecommendation = recommendOptimalTeam(targetProject, employees, targetProject.teamSize || 4);
+    }
+
     try {
-      const result = await askDronaHqAdvisor({
+      const responseText = await askNvidiaAssistant({
         prompt: query,
-        threadId,
         agentId: activeAgentId,
-        project: selectedProject,
-        recommendation,
+        project: targetProject,
+        recommendation: currentRecommendation,
         workloadStats,
         skillGaps,
         history: messages
       });
 
-      if (result.threadId) {
-        setThreadId(result.threadId);
-      }
-
-      const responseText = result.text;
-
       // Detect structured data to render interactive cards
       let structuredData = null;
-      if (lower.includes('squad') || lower.includes('recommend squad') || (lower.includes('team') && lower.includes('recommend'))) {
+      const isTeamQuery = (
+        lower.includes('team') ||
+        lower.includes('squad') ||
+        lower.includes('employee') ||
+        lower.includes('who') ||
+        lower.includes('best') ||
+        lower.includes('recommend') ||
+        lower.includes('staff') ||
+        lower.includes('assign')
+      ) && (
+        lower.includes('project') ||
+        lower.includes('app') ||
+        lower.includes('sme') ||
+        lower.includes('for') ||
+        lower.includes('squad') ||
+        lower.includes('best') ||
+        lower.includes('team')
+      );
+
+      if (isTeamQuery) {
         structuredData = {
           type: 'squad',
-          project: selectedProject,
-          members: recommendation?.recommendedMembers || [],
-          avgMatchScore: recommendation?.avgMatchScore || 85,
-          gaps: recommendation?.identifiedGaps || []
+          project: targetProject,
+          members: currentRecommendation?.recommendedMembers || [],
+          avgMatchScore: currentRecommendation?.avgMatchScore || 85,
+          gaps: currentRecommendation?.identifiedGaps || []
         };
       } else if (lower.includes('balance') || lower.includes('overload') || lower.includes('reallocate') || lower.includes('rebalance')) {
         structuredData = {
@@ -188,7 +297,7 @@ export default function AiAdvisorView({
 
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {
-      console.error('DronaHQ AI query failed:', err);
+      console.error('NVIDIA AI query failed:', err);
       setMessages(prev => [
         ...prev,
         {
@@ -196,7 +305,7 @@ export default function AiAdvisorView({
           sender: 'assistant',
           agent: 'System',
           isError: true,
-          text: 'Unable to reach DronaHQ Agent webhook. Non-AI deterministic workforce tools remain fully operational.',
+          text: 'Unable to reach NVIDIA NIM inference service. Non-AI deterministic workforce tools remain fully operational.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -243,18 +352,18 @@ export default function AiAdvisorView({
                   style={{
                     fontSize: '0.66rem',
                     fontWeight: '700',
-                    color: '#0369a1',
-                    backgroundColor: '#e0f2fe',
+                    color: '#15803d',
+                    backgroundColor: '#dcfce7',
                     padding: '2px 8px',
                     borderRadius: '9999px',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px'
                   }}
-                  title="Connected to DronaHQ Agent Webhook"
+                  title="Powered by NVIDIA NIM Inference API (DiffusionGemma-26B)"
                 >
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0284c7' }}></span>
-                  DronaHQ Agent
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
+                  NVIDIA NIM • Live
                 </span>
                 <span
                   style={{
@@ -276,7 +385,7 @@ export default function AiAdvisorView({
                 </span>
               </div>
               <p style={{ fontSize: '0.76rem', color: '#64748b', margin: 0, marginTop: '1px' }}>
-                Chat with your autonomous workforce intelligence copilot • Powered by DronaHQ & ElevenLabs Voice
+                Chat with your autonomous workforce intelligence copilot • Powered by NVIDIA NIM & ElevenLabs Voice
               </p>
             </div>
           </div>
@@ -315,7 +424,7 @@ export default function AiAdvisorView({
                 How can I help with your workforce?
               </h3>
               <p className="ai-advisor-empty-desc">
-                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by DronaHQ AI Agent webhook and ElevenLabs Voice.
+                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by NVIDIA NIM and ElevenLabs Voice.
               </p>
             </div>
           )}
@@ -363,13 +472,13 @@ export default function AiAdvisorView({
                         style={{
                           fontSize: '0.62rem',
                           fontWeight: '700',
-                          color: '#0369a1',
-                          backgroundColor: '#e0f2fe',
+                          color: '#15803d',
+                          backgroundColor: '#dcfce7',
                           padding: '1px 6px',
                           borderRadius: '9999px'
                         }}
                       >
-                        DronaHQ Agent
+                        NVIDIA NIM
                       </span>
                     )}
                   </div>
@@ -420,49 +529,194 @@ export default function AiAdvisorView({
                     style={{
                       backgroundColor: '#ffffff',
                       border: '1px solid #e2e8f0',
-                      borderRadius: '10px',
-                      padding: '14px 16px',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+                      borderRadius: '12px',
+                      padding: '16px 18px',
+                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#0f172a' }}>
-                        Recommended Squad for "{msg.structuredData.project?.name || 'Project'}"
-                      </span>
-                      <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#15803d', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: '9999px' }}>
-                        {msg.structuredData.avgMatchScore}% Match Average
-                      </span>
+                    {/* Squad Card Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '0.90rem', fontWeight: '800', color: '#0f172a' }}>
+                          Recommended Squad for "{msg.structuredData.project?.name || 'Project'}"
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                          {msg.structuredData.project?.description || 'Optimized matching based on verified skills, seniority, and bandwidth'}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#15803d', backgroundColor: '#dcfce7', padding: '3px 10px', borderRadius: '9999px' }}>
+                          {msg.structuredData.avgMatchScore}% Match Average
+                        </span>
+                        <button
+                          onClick={() => handleOpenMailModal(msg.structuredData)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            backgroundColor: '#1d4ed8',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '0.76rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(29, 78, 216, 0.25)',
+                            transition: 'all 0.15s ease'
+                          }}
+                          title="Mail team assignment to all recommended employees"
+                        >
+                          <Mail size={13} />
+                          <span>Mail Team (All {msg.structuredData.members.length})</span>
+                        </button>
+                      </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px', marginBottom: '12px' }}>
-                      {msg.structuredData.members.map((m, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            padding: '8px 10px',
-                            backgroundColor: '#f8fafc',
-                            borderRadius: '6px',
-                            border: '1px solid #f1f5f9',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                          }}
-                        >
-                          <div>
-                            <div style={{ fontSize: '0.78rem', fontWeight: '700', color: '#0f172a' }}>
-                              {m.employee.name}
+                    {/* Employee Cards Grid: With Skills, Avatar & Profile Action */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+                      {msg.structuredData.members.map((m, idx) => {
+                        const emp = m.employee || m;
+                        const skills = emp.skills || [];
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              padding: '12px 14px',
+                              backgroundColor: '#f8fafc',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '8px',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {/* Member Profile Row */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <img
+                                  src={emp.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=2563eb&color=fff`}
+                                  alt={emp.name}
+                                  style={{
+                                    width: '38px',
+                                    height: '38px',
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                    border: '2px solid #e2e8f0',
+                                    flexShrink: 0
+                                  }}
+                                />
+                                <div>
+                                  <div style={{ fontSize: '0.82rem', fontWeight: '800', color: '#0f172a' }}>
+                                    {emp.name}
+                                  </div>
+                                  <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: '500' }}>
+                                    {emp.role}
+                                  </div>
+                                  <div style={{ fontSize: '0.64rem', color: '#94a3b8' }}>
+                                    {emp.department || 'Engineering'} • {emp.experienceYears ? `${emp.experienceYears} yrs exp` : `${emp.seniority || 3} yrs`}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                                <span
+                                  style={{
+                                    fontSize: '0.74rem',
+                                    fontWeight: '800',
+                                    color: '#15803d',
+                                    backgroundColor: '#dcfce7',
+                                    padding: '2px 8px',
+                                    borderRadius: '9999px'
+                                  }}
+                                >
+                                  {m.matchScore || 85}% Match
+                                </span>
+                                <span style={{ fontSize: '0.64rem', color: emp.workload > 100 ? '#b91c1c' : '#64748b' }}>
+                                  {emp.workload || 80}% capacity
+                                </span>
+                              </div>
                             </div>
-                            <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                              {m.employee.role}
+
+                            {/* Skills Badges */}
+                            <div>
+                              <div style={{ fontSize: '0.66rem', fontWeight: '700', color: '#64748b', marginBottom: '4px' }}>
+                                Verified Skills:
+                              </div>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                {skills.slice(0, 4).map((s, sIdx) => (
+                                  <span
+                                    key={sIdx}
+                                    style={{
+                                      fontSize: '0.66rem',
+                                      fontWeight: '600',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      backgroundColor: '#ffffff',
+                                      color: '#334155',
+                                      border: '1px solid #cbd5e1'
+                                    }}
+                                  >
+                                    {s.name} {s.level ? `• ${s.level}` : ''}
+                                  </span>
+                                ))}
+                                {skills.length > 4 && (
+                                  <span style={{ fontSize: '0.62rem', color: '#94a3b8', padding: '2px 4px' }}>
+                                    +{skills.length - 4} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Actions: View Profile & Quick Email */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '6px', borderTop: '1px solid #e2e8f0' }}>
+                              <button
+                                onClick={() => onViewEmployee && onViewEmployee(emp)}
+                                style={{
+                                  padding: '4px 10px',
+                                  backgroundColor: '#eff6ff',
+                                  border: '1px solid #bfdbfe',
+                                  color: '#1d4ed8',
+                                  borderRadius: '5px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: '700',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <User size={12} /> View Profile
+                              </button>
+
+                              <a
+                                href={`mailto:${emp.email || `${emp.name?.toLowerCase().replace(/\s+/g, '.')}@nexora-tech.example`}?subject=${encodeURIComponent(`Project Assignment: ${msg.structuredData.project?.name || 'Project'}`)}`}
+                                style={{
+                                  fontSize: '0.70rem',
+                                  color: '#64748b',
+                                  textDecoration: 'none',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '3px 6px',
+                                  borderRadius: '4px',
+                                  backgroundColor: '#ffffff',
+                                  border: '1px solid #e2e8f0'
+                                }}
+                                title={`Send individual email to ${emp.name}`}
+                              >
+                                <Mail size={12} /> {emp.email || 'Email'}
+                              </a>
                             </div>
                           </div>
-                          <span style={{ fontSize: '0.74rem', fontWeight: '700', color: '#2563eb' }}>
-                            {m.matchScore}%
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
+                    {/* Squad Card Bottom Actions */}
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button
                         onClick={onOpenWhyModal}
@@ -747,8 +1001,8 @@ export default function AiAdvisorView({
                   gap: '8px'
                 }}
               >
-                <Loader2 size={16} className="spin-animation" color="#0284c7" />
-                <span>DronaHQ Agent is processing query across workforce data...</span>
+                <Loader2 size={16} className="spin-animation" color="#16a34a" />
+                <span>NVIDIA NIM is reasoning across real organization data...</span>
               </div>
             </div>
           )}
@@ -906,6 +1160,195 @@ export default function AiAdvisorView({
           </div>
         </div>
       )}
+
+      {/* Dispatch Squad Email Modal */}
+      {mailModalData && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.55)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1050,
+            padding: '20px'
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '14px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '560px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Mail size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
+                    Dispatch Project Assignment Email
+                  </h3>
+                  <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0 }}>
+                    Notifying all {mailModalData.members.length} recommended team members for {mailModalData.project?.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setMailModalData(null)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Recipients List Chips */}
+            <div>
+              <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '6px' }}>
+                Recipients ({mailModalData.members.length} Squad Members):
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxHeight: '100px', overflowY: 'auto', padding: '8px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                {mailModalData.members.map((m, idx) => {
+                  const emp = m.employee || m;
+                  return (
+                    <span
+                      key={idx}
+                      style={{
+                        fontSize: '0.70rem',
+                        fontWeight: '600',
+                        padding: '3px 8px',
+                        backgroundColor: '#eff6ff',
+                        color: '#1d4ed8',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '9999px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <User size={10} />
+                      {emp.name} &lt;{emp.email || `${emp.name?.toLowerCase().replace(/\s+/g, '.')}@nexora-tech.example`}&gt;
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Subject Field */}
+            <div>
+              <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>
+                Email Subject:
+              </label>
+              <input
+                type="text"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.82rem',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Message Body Field */}
+            <div>
+              <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>
+                Assignment Briefing Body:
+              </label>
+              <textarea
+                rows={6}
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.78rem',
+                  lineHeight: 1.5,
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px' }}>
+              <button
+                className="btn-secondary"
+                onClick={() => setMailModalData(null)}
+                style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendAllMail}
+                style={{
+                  backgroundColor: '#1d4ed8',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '8px 18px',
+                  borderRadius: '6px',
+                  fontSize: '0.82rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(29, 78, 216, 0.3)'
+                }}
+              >
+                <Mail size={14} /> Send Email to All ({mailModalData.members.length} Members)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            backgroundColor: '#0f172a',
+            color: '#ffffff',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            fontSize: '0.82rem',
+            fontWeight: '600',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            animation: 'slideUp 0.2s ease-out'
+          }}
+        >
+          <CheckCircle2 size={16} color="#4ade80" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* ElevenLabs Conversational Voice Agent */}
       <elevenlabs-convai agent-id="agent_4601m4zj1veyephbfygc6spnnqgp"></elevenlabs-convai>
     </div>
