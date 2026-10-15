@@ -17,7 +17,8 @@ import {
   RefreshCw,
   Award,
   BookOpen,
-  CheckCircle2
+  CheckCircle2,
+  Mic
 } from 'lucide-react';
 import { askDronaHqAdvisor, DRONAHQ_WEBHOOK_URL } from '../../utils/dronaHqService';
 
@@ -55,6 +56,17 @@ export default function AiAdvisorView({
       scrollToBottom();
     }
   }, [messages, isGenerating]);
+
+  // Load ElevenLabs Conversational AI widget script
+  useEffect(() => {
+    if (!document.querySelector('script[src*="convai-widget-embed"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
+      script.async = true;
+      script.type = 'text/javascript';
+      document.body.appendChild(script);
+    }
+  }, []);
 
   const suggestedPrompts = [
     {
@@ -244,9 +256,27 @@ export default function AiAdvisorView({
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0284c7' }}></span>
                   DronaHQ Agent
                 </span>
+                <span
+                  style={{
+                    fontSize: '0.66rem',
+                    fontWeight: '700',
+                    color: '#4338ca',
+                    backgroundColor: '#eef2ff',
+                    border: '1px solid #c7d2fe',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="ElevenLabs Voice Agent Active"
+                >
+                  <Mic size={11} color="#4f46e5" />
+                  ElevenLabs Voice
+                </span>
               </div>
               <p style={{ fontSize: '0.76rem', color: '#64748b', margin: 0, marginTop: '1px' }}>
-                Chat with your autonomous workforce intelligence copilot • Powered by DronaHQ
+                Chat with your autonomous workforce intelligence copilot • Powered by DronaHQ & ElevenLabs Voice
               </p>
             </div>
           </div>
@@ -285,7 +315,7 @@ export default function AiAdvisorView({
                 How can I help with your workforce?
               </h3>
               <p className="ai-advisor-empty-desc">
-                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by DronaHQ AI Agent webhook.
+                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by DronaHQ AI Agent webhook and ElevenLabs Voice.
               </p>
             </div>
           )}
@@ -876,6 +906,8 @@ export default function AiAdvisorView({
           </div>
         </div>
       )}
+      {/* ElevenLabs Conversational Voice Agent */}
+      <elevenlabs-convai agent-id="agent_4601m4zj1veyephbfygc6spnnqgp"></elevenlabs-convai>
     </div>
   );
 }
