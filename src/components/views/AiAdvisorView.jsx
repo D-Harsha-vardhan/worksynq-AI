@@ -195,46 +195,11 @@ export default function AiAdvisorView({
   };
 
   return (
-    <div
-      className="ai-advisor-container"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        width: '100%',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        minHeight: 0
-      }}
-    >
+    <div className="ai-advisor-page">
       {/* Dedicated Chat Card */}
-      <div
-        className="card"
-        style={{
-          padding: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minHeight: 0,
-          height: '100%',
-          overflow: 'hidden',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.05)',
-          backgroundColor: '#ffffff'
-        }}
-      >
+      <div className="ai-advisor-card">
         {/* Chat Top Header */}
-        <div
-          style={{
-            padding: '14px 22px',
-            borderBottom: '1px solid var(--border-light)',
-            backgroundColor: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexShrink: 0
-          }}
-        >
+        <div className="ai-advisor-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
@@ -301,52 +266,16 @@ export default function AiAdvisorView({
         </div>
 
         {/* Chat Messages Stream */}
-        <div
-          ref={chatScrollRef}
-          style={{
-            flex: 1,
-            minHeight: 0,
-            overflowY: 'auto',
-            padding: '24px 28px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '18px',
-            backgroundColor: '#ffffff'
-          }}
-        >
+        <div ref={chatScrollRef} className="ai-advisor-conversation">
           {messages.length === 0 && !isGenerating && (
-            <div
-              style={{
-                margin: 'auto',
-                textAlign: 'center',
-                padding: '40px 20px',
-                maxWidth: '480px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center'
-              }}
-            >
-              <div
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '16px',
-                  background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)',
-                  border: '1px solid #bfdbfe',
-                  color: '#2563eb',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '16px',
-                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.15)'
-                }}
-              >
-                <Bot size={30} />
+            <div className="ai-advisor-empty-state">
+              <div className="ai-advisor-empty-icon">
+                <Bot size={28} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>
+              <h3 className="ai-advisor-empty-title">
                 How can I help with your workforce?
               </h3>
-              <p style={{ fontSize: '0.86rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+              <p className="ai-advisor-empty-desc">
                 Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by real organization data and NVIDIA NIM.
               </p>
             </div>
@@ -789,18 +718,7 @@ export default function AiAdvisorView({
         </div>
 
         {/* Prompt Suggestions Bar */}
-        <div
-          style={{
-            padding: '10px 22px',
-            backgroundColor: '#f8fafc',
-            borderTop: '1px solid var(--border-light)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            overflowX: 'auto',
-            flexShrink: 0
-          }}
-        >
+        <div className="ai-advisor-suggestions">
           <span
             style={{
               fontSize: '0.72rem',
@@ -839,14 +757,7 @@ export default function AiAdvisorView({
         </div>
 
         {/* Bottom Chat Input Form */}
-        <div
-          style={{
-            padding: '16px 22px',
-            borderTop: '1px solid var(--border-light)',
-            backgroundColor: '#ffffff',
-            flexShrink: 0
-          }}
-        >
+        <div className="ai-advisor-composer">
           <form
             onSubmit={(e) => {
               e.preventDefault();
