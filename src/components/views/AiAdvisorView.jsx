@@ -221,8 +221,87 @@ connect2future`;
     setTimeout(() => setToastMessage(null), 4500);
   };
 
+  const handleOpenOutlookMailAll = (squadData = null) => {
+    const data = squadData || mailModalData;
+    if (!data) return;
+    const members = data.members || [];
+    const project = data.project || { name: 'SME App' };
+
+    // Comma-separated list of all employee emails for Outlook
+    const emails = members.map(m => {
+      const emp = m.employee || m;
+      return emp.email || `${emp.name?.toLowerCase().replace(/\s+/g, '.')}@connect2future.com`;
+    }).join(',');
+
+    const isQuote = data.isQuotationAudit || (data.quotationDisplay && !data.members?.some(m => !m.matchScore));
+    let subject = emailSubject;
+    let body = emailBody;
+
+    if (!subject) {
+      subject = isQuote
+        ? `[Feasibility Audit] Quotation & Delivery Review for ${project.name} • connect2future`
+        : `[Project Assignment] Core Squad Allocation for ${project.name} • connect2future`;
+    }
+
+    if (!body) {
+      body = `Hi Team,\n\nCongratulations! You have been selected as the core squad for "${project.name}" at connect2future based on your verified skills, experience, and current bandwidth availability.\n\nRecommended Team Roster:\n${members.map(m => {
+        const emp = m.employee || m;
+        const topSkills = (emp.skills || []).slice(0, 3).map(s => typeof s === 'string' ? s : s.name).join(', ');
+        return `• ${emp.name} (${emp.role}) — ${m.matchScore || 85}% Skill Match | Skills: ${topSkills || 'Full-Stack'}`;
+      }).join('\n')}\n\nNext Steps:\n1. Review project requirements and sprint timeline in Workforce Intelligence.\n2. Join the technical kickoff session this week.\n3. Reach out to Talent Operations if you have any questions.\n\nBest regards,\nTalent Operations & Project Planning\nconnect2future`;
+    }
+
+    // Launch Outlook with mailto link
+    const mailtoUrl = `mailto:${emails}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const link = document.createElement('a');
+    link.href = mailtoUrl;
+    link.target = '_self';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Also notify Activepieces webhook asynchronously in background
+    try {
+      fetch(ACTIVEPIECES_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company: 'connect2future',
+          project: project.name || 'SME App',
+          event: 'outlook_team_assignment_dispatch',
+          timestamp: new Date().toISOString(),
+          recipients: emails,
+          subject
+        })
+      }).catch(() => {});
+    } catch (e) {}
+
+    setMailModalData(null);
+    setToastMessage(`✓ Opened Outlook to mail all ${members.length} team members!`);
+    setTimeout(() => setToastMessage(null), 4500);
+  };
+
+  const handleOpenOutlookIndividual = (squadData, emp) => {
+    if (!emp) return;
+    const project = squadData?.project || { name: 'SME App' };
+    const empEmail = emp.email || `${emp.name?.toLowerCase().replace(/\s+/g, '.')}@connect2future.com`;
+    const subject = `[Project Assignment] ${project.name} • connect2future`;
+    const body = `Hi ${emp.name},\n\nYou have been selected for project "${project.name}" at connect2future as ${emp.role}.\n\nPlease review your sprint allocation in Workforce Intelligence.\n\nBest regards,\nconnect2future`;
+
+    const mailtoUrl = `mailto:${empEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const link = document.createElement('a');
+    link.href = mailtoUrl;
+    link.target = '_self';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setToastMessage(`✓ Opened Outlook to mail ${emp.name}!`);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
   const handleSendAllMail = () => {
-    handleSendActivepiecesMail(mailModalData);
+    handleOpenOutlookMailAll(mailModalData);
   };
 
   const handleSendMessage = async (textToSend = null, requestedAgentId = null) => {
@@ -704,7 +783,7 @@ connect2future`;
                           {msg.structuredData.avgMatchScore}% Match Average
                         </span>
                         <button
-                          onClick={() => handleOpenMailModal(msg.structuredData)}
+                          onClick={() => handleOpenOutlookMailAll(msg.structuredData)}
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -720,10 +799,29 @@ connect2future`;
                             boxShadow: '0 2px 6px rgba(29, 78, 216, 0.25)',
                             transition: 'all 0.15s ease'
                           }}
-                          title="Mail team assignment to all recommended employees"
+                          title="Open Outlook to email all recommended team members"
                         >
                           <Mail size={13} />
-                          <span>Mail Team (All {msg.structuredData.members.length})</span>
+                          <span>Mail All in Outlook ({msg.structuredData.members.length})</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenMailModal(msg.structuredData)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '6px 10px',
+                            backgroundColor: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: '6px',
+                            fontSize: '0.74rem',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                          title="Edit email message and preview recipients"
+                        >
+                          Edit
                         </button>
                       </div>
                     </div>
@@ -847,12 +945,12 @@ connect2future`;
                               </button>
 
                               <button
-                                onClick={() => handleSendActivepiecesMail(msg.structuredData, emp)}
+                                onClick={() => handleOpenOutlookIndividual(msg.structuredData, emp)}
                                 style={{
                                   fontSize: '0.70rem',
-                                  color: '#065f46',
-                                  backgroundColor: '#ecfdf5',
-                                  border: '1px solid #a7f3d0',
+                                  color: '#1d4ed8',
+                                  backgroundColor: '#eff6ff',
+                                  border: '1px solid #bfdbfe',
                                   borderRadius: '4px',
                                   padding: '4px 8px',
                                   display: 'inline-flex',
@@ -861,9 +959,9 @@ connect2future`;
                                   fontWeight: '600',
                                   cursor: 'pointer'
                                 }}
-                                title={`Dispatch complete team briefing via Activepieces webhook`}
+                                title={`Open Outlook to email ${emp.name}`}
                               >
-                                <Mail size={12} color="#059669" /> Mail Team
+                                <Mail size={12} color="#2563eb" /> Mail in Outlook
                               </button>
                             </div>
                           </div>
@@ -1167,7 +1265,7 @@ connect2future`;
                           {msg.structuredData.verdict}
                         </span>
                         <button
-                          onClick={() => handleOpenMailModal(msg.structuredData)}
+                          onClick={() => handleOpenOutlookMailAll(msg.structuredData)}
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -1182,9 +1280,29 @@ connect2future`;
                             cursor: 'pointer',
                             boxShadow: '0 2px 6px rgba(29, 78, 216, 0.25)'
                           }}
+                          title="Open Outlook to email all recommended team members"
                         >
                           <Mail size={13} />
-                          <span>Mail Feasibility Report</span>
+                          <span>Mail All in Outlook</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenMailModal(msg.structuredData)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '6px 10px',
+                            backgroundColor: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: '6px',
+                            fontSize: '0.74rem',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                          title="Edit email message and preview recipients"
+                        >
+                          Edit
                         </button>
                       </div>
                     </div>
@@ -1311,12 +1429,12 @@ connect2future`;
                                     Profile
                                   </button>
                                   <button
-                                    onClick={() => handleSendActivepiecesMail(msg.structuredData, emp)}
+                                    onClick={() => handleOpenOutlookIndividual(msg.structuredData, emp)}
                                     style={{
                                       padding: '3px 8px',
-                                      backgroundColor: '#f0fdf4',
-                                      border: '1px solid #bbf7d0',
-                                      color: '#166534',
+                                      backgroundColor: '#eff6ff',
+                                      border: '1px solid #bfdbfe',
+                                      color: '#1d4ed8',
                                       borderRadius: '4px',
                                       fontSize: '0.68rem',
                                       fontWeight: '600',
@@ -1325,9 +1443,9 @@ connect2future`;
                                       alignItems: 'center',
                                       gap: '3px'
                                     }}
-                                    title="Dispatch complete team briefing to Activepieces webhook"
+                                    title={`Open Outlook to email ${emp.name}`}
                                   >
-                                    <Mail size={11} color="#059669" /> Mail Team
+                                    <Mail size={11} color="#2563eb" /> Mail
                                   </button>
                                 </div>
                               </div>
@@ -1602,14 +1720,14 @@ connect2future`;
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>
-                      Dispatch Project Assignment
+                      Dispatch Project Assignment Email
                     </h3>
-                    <span style={{ fontSize: '0.64rem', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
-                      Activepieces Webhook
+                    <span style={{ fontSize: '0.64rem', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>
+                      Microsoft Outlook
                     </span>
                   </div>
                   <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0 }}>
-                    Triggers Activepieces workflow for complete squad ({mailModalData.members.length} members) on {mailModalData.project?.name}
+                    Opens Microsoft Outlook with pre-filled message for all {mailModalData.members.length} team members on {mailModalData.project?.name}
                   </p>
                 </div>
               </div>
@@ -1708,9 +1826,29 @@ connect2future`;
                 Cancel
               </button>
               <button
-                onClick={handleSendAllMail}
+                onClick={() => handleSendActivepiecesMail(mailModalData)}
                 style={{
-                  backgroundColor: '#059669',
+                  backgroundColor: '#ffffff',
+                  color: '#059669',
+                  border: '1px solid #a7f3d0',
+                  padding: '9px 14px',
+                  borderRadius: '6px',
+                  fontSize: '0.80rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                title="Also dispatch to Activepieces workflow"
+              >
+                <ExternalLink size={14} />
+                <span>Activepieces</span>
+              </button>
+              <button
+                onClick={() => handleOpenOutlookMailAll(mailModalData)}
+                style={{
+                  backgroundColor: '#1d4ed8',
                   color: '#ffffff',
                   border: 'none',
                   padding: '9px 20px',
@@ -1721,11 +1859,11 @@ connect2future`;
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)'
+                  boxShadow: '0 2px 8px rgba(29, 78, 216, 0.3)'
                 }}
               >
-                <ExternalLink size={15} />
-                <span>Dispatch Complete Team to Activepieces</span>
+                <Mail size={15} />
+                <span>Open in Outlook &amp; Mail All ({mailModalData.members.length})</span>
               </button>
             </div>
           </div>
