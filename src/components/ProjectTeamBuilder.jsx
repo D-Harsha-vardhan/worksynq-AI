@@ -140,40 +140,57 @@ export default function ProjectTeamBuilder({
                 <td>
                   <div className={`match-score-badge ${isMatchHigh ? 'match-high' : 'match-med'}`}>
                     <span className="score-indicator-circle">
-                      <CheckCircle2 size={14} />
+                      <CheckCircle2 size={13} />
                     </span>
                     <span>{member.matchScore}%</span>
                   </div>
                 </td>
                 <td>
-                  <div className="status-indicator">
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '0.72rem',
+                      fontWeight: '700',
+                      padding: '3px 9px',
+                      borderRadius: '9999px',
+                      backgroundColor: emp.workload > 100 ? '#f0f4ff' : '#eff6ff',
+                      color: emp.workload > 100 ? '#1e40af' : '#1d4ed8',
+                      border: emp.workload > 100 ? '1px solid #c7d9f9' : '1px solid #bfdbfe'
+                    }}
+                  >
                     <span
-                      className="status-dot"
-                      style={{ backgroundColor: emp.workload > 100 ? '#1e40af' : '#2563eb' }}
+                      style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        backgroundColor: emp.workload > 100 ? '#1e40af' : '#2563eb',
+                        flexShrink: 0
+                      }}
                     ></span>
-                    <span style={{ color: emp.workload > 100 ? '#1e3a8a' : '#1d4ed8', fontWeight: '600' }}>
-                      {emp.workload > 100 ? 'Overallocated' : 'Available'}
-                    </span>
-                  </div>
+                    <span>{emp.workload > 100 ? 'Overallocated' : 'Available'}</span>
+                  </span>
                 </td>
                 <td>
                   <div className="capacity-meter">
-                    <div className="capacity-track">
+                    <div className="capacity-track" style={{ backgroundColor: '#f1f5f9', height: '6px', borderRadius: '9999px' }}>
                       <div
                         className="capacity-bar"
                         style={{
                           width: `${Math.min(100, emp.capacity)}%`,
-                          background: 'linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%)'
+                          background: emp.capacity > 90 ? 'linear-gradient(90deg, #1d4ed8 0%, #1e3a8a 100%)' : 'linear-gradient(90deg, #2563eb 0%, #38bdf8 100%)',
+                          borderRadius: '9999px'
                         }}
                       ></div>
                     </div>
-                    <span className="capacity-text">{emp.capacity}%</span>
+                    <span className="capacity-text" style={{ fontWeight: '700', fontSize: '0.76rem', color: '#0f172a' }}>{emp.capacity}%</span>
                   </div>
                 </td>
                 <td style={{ textAlign: 'right' }}>
                   <button
                     className="icon-btn"
-                    style={{ width: '28px', height: '28px', marginLeft: 'auto' }}
+                    style={{ width: '28px', height: '28px', marginLeft: 'auto', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
                     onClick={() => setSwapTarget(member)}
                     title="Swap team member"
                   >
