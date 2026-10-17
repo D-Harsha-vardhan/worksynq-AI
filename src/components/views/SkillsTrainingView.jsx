@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { GraduationCap, Award, BookOpen, AlertCircle, CheckCircle2, DollarSign, Clock } from 'lucide-react';
+import { GraduationCap, Award, BookOpen, AlertCircle, CheckCircle2, DollarSign, Clock, ExternalLink } from 'lucide-react';
+import { getCourseUrl } from '../../utils/courseLinks';
 import EnrollTrainingModal from '../modals/EnrollTrainingModal';
 
 export default function SkillsTrainingView({ gaps, employees, onEnroll }) {
@@ -58,10 +59,35 @@ export default function SkillsTrainingView({ gaps, employees, onEnroll }) {
 
               {/* Recommended Course */}
               <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
-                  <BookOpen size={16} />
-                  <span>{gap.suggestedTraining}</span>
-                </div>
+                <a
+                  href={getCourseUrl(gap.skill, gap.suggestedTraining)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`Open ${gap.suggestedTraining} course in a new tab`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '0.84rem',
+                    fontWeight: '700',
+                    color: '#1d4ed8',
+                    textDecoration: 'none',
+                    marginBottom: '4px',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textDecoration = 'underline';
+                    e.currentTarget.style.color = '#1e40af';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textDecoration = 'none';
+                    e.currentTarget.style.color = '#1d4ed8';
+                  }}
+                >
+                  <BookOpen size={16} style={{ flexShrink: 0 }} />
+                  <span style={{ flex: 1 }}>{gap.suggestedTraining}</span>
+                  <ExternalLink size={13} style={{ flexShrink: 0, opacity: 0.8 }} />
+                </a>
                 <div style={{ display: 'flex', gap: '14px', fontSize: '0.74rem', color: '#3b82f6', marginTop: '6px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12} /> {gap.duration}</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><DollarSign size={12} /> {gap.cost}</span>
