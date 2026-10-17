@@ -2477,3 +2477,104 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   ENTERPRISE UI REFINEMENTS & MICRO-INTERACTIONS
+   Executive styling, custom sleek scrollbars, and glassmorphic elevations
+   ========================================================================== */
+
+/* Modern Sleek Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Enhanced Focus Outlines */
+input:focus-visible, button:focus-visible, select:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Modern Card Hover Elevation */
+.card, .kpi-card, .team-builder-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.card:hover, .team-builder-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+}
+
+/* Interactive Table Hover */
+.custom-table tbody tr {
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Search Shortcut Badge */
+.search-shortcut {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  line-height: 1;
+}
+
+/* Pulse Beacon */
+.pulse-beacon {
+  position: relative;
+}
+
+.pulse-beacon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  animation: beacon-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: inherit;
+  opacity: 0.7;
+}
+
+@keyframes beacon-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  70% { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Shimmer Highlight */
+.shimmer-badge {
+  background: linear-gradient(90deg, #eff6ff 0%, #dbeafe 50%, #eff6ff 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+

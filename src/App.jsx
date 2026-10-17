@@ -105,6 +105,11 @@ export default function App() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onSelectEmployee={(emp) => setViewEmployeeTarget(emp)}
+          onSelectProject={(proj) => {
+            setSelectedProject(proj);
+            setActiveTab('overview');
+            showToast(`Selected project: "${proj.name}"`);
+          }}
         />
 
         {/* Content Body: Center Main + Right AI Sidebar */}
