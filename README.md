@@ -2,11 +2,10 @@
 ### Autonomous Talent Planning, Squad Optimization & Workforce Intelligence Copilot
 
 [![Workforce Intelligence](https://img.shields.io/badge/WorkSynq_AI-Enterprise_v2.4-1d4ed8?style=for-the-badge&logo=react&logoColor=white)](https://github.com/D-Harsha-vardhan/worksynq-AI)
-[![UI Theme](https://img.shields.io/badge/Theme-White_%26_Blue_Enterprise-2563eb?style=for-the-badge)](https://github.com/D-Harsha-vardhan/worksynq-AI)
 [![Autonomous Agent](https://img.shields.io/badge/AI_Agent-DronaHQ_Webhook-0284c7?style=for-the-badge)](https://github.com/D-Harsha-vardhan/worksynq-AI)
 [![Voice Copilot](https://img.shields.io/badge/Voice-ElevenLabs_ConvAI-3b82f6?style=for-the-badge)](https://github.com/D-Harsha-vardhan/worksynq-AI)
 
-A state-of-the-art enterprise workforce intelligence copilot and talent optimization platform built with **React 19**, **Vite 6**, and an **Executive White & Blue Design System**. WorkSynq AI unifies combinatorial team assembly, automated sprint workload rebalancing, document quotation auditing, Kanban lifecycle telemetry, and autonomous multi-agent reasoning.
+A state-of-the-art enterprise workforce intelligence copilot and talent optimization platform built with **React 19** and **Vite 6**. WorkSynq AI unifies combinatorial team assembly, automated sprint workload rebalancing, document quotation auditing, Kanban lifecycle telemetry, and autonomous multi-agent reasoning.
 
 ---
 
@@ -129,17 +128,6 @@ sequenceDiagram
 
 ### 7. 📈 Executive Reporting
 - **PDF & CSV Export**: Export comprehensive talent utilization, staffing velocity, and project health snapshots.
-
----
-
-## 🎨 Enterprise Design System
-
-WorkSynq AI is built with an **Executive White & Blue Palette** designed for high-contrast enterprise decision-making:
-- **Surface Canvas**: Ultra-crisp `#f8fafc` background with `#ffffff` glassmorphic cards.
-- **Brand Sapphire**: `#1d4ed8` and `#2563eb` for primary actions, active indicators, and focus states.
-- **Sky Accent**: `#0284c7` and `#38bdf8` for progress gradients and availability beacons.
-- **Ice Blue Tints**: `#eff6ff` and `#dbeafe` for soft chip backgrounds and subtle borders.
-- **Typography Hierarchy**: `Plus Jakarta Sans` for clean data visualization, paired with `Outfit` for executive headings and `Inter` for numerical KPIs.
 
 ---
 
