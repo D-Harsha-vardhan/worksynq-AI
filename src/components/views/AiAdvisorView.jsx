@@ -24,7 +24,7 @@ import {
   ExternalLink,
   X
 } from 'lucide-react';
-import { askNvidiaAssistant } from '../../utils/nvidiaAiService';
+import { askDronaHqAdvisor } from '../../utils/dronaHqService';
 import { recommendOptimalTeam } from '../../utils/matchingEngine';
 
 export default function AiAdvisorView({
@@ -52,8 +52,6 @@ export default function AiAdvisorView({
   const [toastMessage, setToastMessage] = useState(null);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
-  const [loadingSecondsLeft, setLoadingSecondsLeft] = useState(25);
-  const [loadingStageText, setLoadingStageText] = useState('Initializing NVIDIA NIM deep reasoning engine...');
 
   const scrollToBottom = () => {
     if (chatScrollRef.current) {
@@ -260,42 +258,18 @@ connect2future`;
       currentRecommendation = recommendOptimalTeam(targetProject, employees, targetProject.teamSize || 4);
     }
 
-    // 25-second deep reasoning simulation timer as requested
-    setLoadingSecondsLeft(25);
-    setLoadingStageText('Connecting to NVIDIA NIM llama-3.1-70b-instruct cluster...');
-
-    let timerInterval = null;
-    timerInterval = setInterval(() => {
-      setLoadingSecondsLeft(prev => {
-        const next = prev - 1;
-        if (next <= 5) {
-          setLoadingStageText('Synthesizing final executive briefing & team recommendation payload...');
-        } else if (next <= 10) {
-          setLoadingStageText('Auditing financial feasibility, margins & commercial profit ROI for connect2future...');
-        } else if (next <= 15) {
-          setLoadingStageText('Evaluating project delivery milestones, sprint effort & capacity buffers...');
-        } else if (next <= 20) {
-          setLoadingStageText('Scanning connect2future talent pool & active employee skill matrix...');
-        }
-        return Math.max(0, next);
-      });
-    }, 1000);
-
-    const delayPromise = new Promise(resolve => setTimeout(resolve, 25000));
-
     try {
-      const [responseText] = await Promise.all([
-        askNvidiaAssistant({
-          prompt: query,
-          agentId: activeAgentId,
-          project: targetProject,
-          recommendation: currentRecommendation,
-          workloadStats,
-          skillGaps,
-          history: messages
-        }),
-        delayPromise
-      ]);
+      const agentResult = await askDronaHqAdvisor({
+        prompt: query,
+        agentId: activeAgentId,
+        project: targetProject,
+        recommendation: currentRecommendation,
+        workloadStats,
+        skillGaps,
+        history: messages
+      });
+
+      const responseText = agentResult?.text || agentResult || '';
 
       // Detect structured data to render interactive cards
       let structuredData = null;
@@ -411,7 +385,7 @@ connect2future`;
 
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {
-      console.error('NVIDIA AI query failed:', err);
+      console.error('DronaHQ AI query failed:', err);
       setMessages(prev => [
         ...prev,
         {
@@ -419,12 +393,11 @@ connect2future`;
           sender: 'assistant',
           agent: 'System',
           isError: true,
-          text: 'Unable to reach NVIDIA NIM inference service. Non-AI deterministic workforce tools remain fully operational.',
+          text: 'Unable to reach DronaHQ AI Agent webhook. Non-AI deterministic workforce tools remain fully operational.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
     } finally {
-      if (timerInterval) clearInterval(timerInterval);
       setIsGenerating(false);
     }
   };
@@ -467,18 +440,19 @@ connect2future`;
                   style={{
                     fontSize: '0.66rem',
                     fontWeight: '700',
-                    color: '#15803d',
-                    backgroundColor: '#dcfce7',
+                    color: '#1d4ed8',
+                    backgroundColor: '#eff6ff',
+                    border: '1px solid #bfdbfe',
                     padding: '2px 8px',
                     borderRadius: '9999px',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px'
                   }}
-                  title="Powered by NVIDIA NIM Inference API (DiffusionGemma-26B)"
+                  title="Powered by DronaHQ Autonomous AI Agent"
                 >
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
-                  NVIDIA NIM • Live
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#2563eb' }}></span>
+                  DronaHQ Agent • Live
                 </span>
                 <span
                   style={{
@@ -500,7 +474,7 @@ connect2future`;
                 </span>
               </div>
               <p style={{ fontSize: '0.76rem', color: '#64748b', margin: 0, marginTop: '1px' }}>
-                Chat with your autonomous workforce intelligence copilot • Powered by NVIDIA NIM & ElevenLabs Voice
+                Chat with your autonomous workforce intelligence copilot • Powered by DronaHQ AI Agent & ElevenLabs Voice
               </p>
             </div>
           </div>
@@ -539,7 +513,7 @@ connect2future`;
                 How can I help with your workforce?
               </h3>
               <p className="ai-advisor-empty-desc">
-                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by NVIDIA NIM and ElevenLabs Voice.
+                Ask any question about team optimization, skill gaps, employee workloads, or project staffing. Powered by DronaHQ AI Agent and ElevenLabs Voice.
               </p>
             </div>
           )}
@@ -587,13 +561,14 @@ connect2future`;
                         style={{
                           fontSize: '0.62rem',
                           fontWeight: '700',
-                          color: '#15803d',
-                          backgroundColor: '#dcfce7',
+                          color: '#1d4ed8',
+                          backgroundColor: '#eff6ff',
+                          border: '1px solid #bfdbfe',
                           padding: '1px 6px',
                           borderRadius: '9999px'
                         }}
                       >
-                        NVIDIA NIM
+                        DronaHQ Agent
                       </span>
                     )}
                   </div>
@@ -1307,58 +1282,22 @@ connect2future`;
               </div>
               <div
                 style={{
-                  padding: '14px 18px',
+                  padding: '12px 18px',
                   borderRadius: '12px',
-                  fontSize: '0.82rem',
+                  fontSize: '0.84rem',
                   backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid #e2e8f0',
                   color: '#1e293b',
                   display: 'flex',
-                  flexDirection: 'column',
+                  alignItems: 'center',
                   gap: '10px',
-                  minWidth: '340px',
-                  maxWidth: '520px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
                 }}
               >
-                {/* Header with spinner and countdown */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#0f172a' }}>
-                    <Loader2 size={16} className="spin-animation" color="#2563eb" />
-                    <span>NVIDIA NIM Deep Reasoning</span>
-                  </div>
-                  <span style={{
-                    fontSize: '0.72rem',
-                    fontWeight: '700',
-                    color: '#2563eb',
-                    backgroundColor: '#eff6ff',
-                    padding: '2px 8px',
-                    borderRadius: '9999px',
-                    border: '1px solid #bfdbfe',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    ⏱️ {loadingSecondsLeft}s remaining
-                  </span>
-                </div>
-
-                {/* Progress Bar Track */}
-                <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f5f9', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      width: `${Math.min(100, Math.round(((25 - loadingSecondsLeft) / 25) * 100))}%`,
-                      height: '100%',
-                      background: 'linear-gradient(90deg, #2563eb 0%, #10b981 100%)',
-                      borderRadius: '9999px',
-                      transition: 'width 1s linear'
-                    }}
-                  />
-                </div>
-
-                {/* Dynamic stage description */}
-                <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={12} color="#10b981" style={{ flexShrink: 0 }} />
-                  <span>{loadingStageText}</span>
-                </div>
+                <Loader2 size={16} className="spin-animation" color="#2563eb" />
+                <span style={{ fontWeight: '600', color: '#1d4ed8' }}>
+                  DronaHQ Agent is analyzing...
+                </span>
               </div>
             </div>
           )}

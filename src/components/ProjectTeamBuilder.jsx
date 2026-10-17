@@ -149,9 +149,9 @@ export default function ProjectTeamBuilder({
                   <div className="status-indicator">
                     <span
                       className="status-dot"
-                      style={{ backgroundColor: emp.workload > 100 ? '#ef4444' : '#10b981' }}
+                      style={{ backgroundColor: emp.workload > 100 ? '#1e40af' : '#2563eb' }}
                     ></span>
-                    <span style={{ color: emp.workload > 100 ? '#dc2626' : '#059669', fontWeight: '600' }}>
+                    <span style={{ color: emp.workload > 100 ? '#1e3a8a' : '#1d4ed8', fontWeight: '600' }}>
                       {emp.workload > 100 ? 'Overallocated' : 'Available'}
                     </span>
                   </div>
@@ -163,7 +163,7 @@ export default function ProjectTeamBuilder({
                         className="capacity-bar"
                         style={{
                           width: `${Math.min(100, emp.capacity)}%`,
-                          backgroundColor: emp.capacity > 90 ? '#10b981' : '#3b82f6'
+                          background: 'linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%)'
                         }}
                       ></div>
                     </div>
@@ -190,7 +190,7 @@ export default function ProjectTeamBuilder({
       <div className="builder-bottom-bar">
         <div className="gaps-container">
           <div className="gaps-label">
-            <AlertTriangle size={15} color="#ef4444" />
+            <AlertTriangle size={15} color="#2563eb" />
             <span>Identified Gaps:</span>
           </div>
           {gaps.length > 0 ? (
@@ -200,7 +200,7 @@ export default function ProjectTeamBuilder({
               </span>
             ))
           ) : (
-            <span style={{ fontSize: '0.76rem', color: '#10b981', fontWeight: '600' }}>
+            <span style={{ fontSize: '0.76rem', color: '#1d4ed8', fontWeight: '600' }}>
               ✓ All required skills fully covered!
             </span>
           )}

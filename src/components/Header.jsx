@@ -63,7 +63,7 @@ export default function Header({ searchQuery, setSearchQuery, onSelectEmployee }
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {notifications.map(n => (
                   <div key={n.id} style={{ display: 'flex', gap: '8px', fontSize: '0.78rem', padding: '6px', borderRadius: '6px', backgroundColor: '#f8fafc' }}>
-                    {n.type === 'warning' ? <AlertTriangle size={15} color="#f59e0b" style={{ flexShrink: 0 }} /> : <CheckCircle2 size={15} color="#10b981" style={{ flexShrink: 0 }} />}
+                    {n.type === 'warning' ? <AlertTriangle size={15} color="#2563eb" style={{ flexShrink: 0 }} /> : <CheckCircle2 size={15} color="#1d4ed8" style={{ flexShrink: 0 }} />}
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: '600', color: '#0f172a' }}>{n.title}</div>
                       <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{n.time}</div>

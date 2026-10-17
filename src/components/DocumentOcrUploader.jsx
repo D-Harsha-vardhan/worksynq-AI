@@ -11,7 +11,7 @@ import {
   Image as ImageIcon,
   FileType
 } from 'lucide-react';
-import { extractProjectFromDocumentWithNvidia } from '../utils/nvidiaAiService';
+import { extractProjectFromDocumentWithDronaHq } from '../utils/dronaHqService';
 
 const SAMPLE_TEMPLATES = [
   {
@@ -137,11 +137,11 @@ export default function DocumentOcrUploader({ onExtracted, onClear, currentFileN
       let extractedData = null;
 
       if (isImage) {
-        setProcessingStep('Optimizing document image for NVIDIA Vision OCR...');
+        setProcessingStep('Optimizing document for DronaHQ Intelligence Agent...');
         const base64Data = await compressImageForOcr(file);
 
-        setProcessingStep('NVIDIA Multimodal OCR: Extracting quotation line items...');
-        extractedData = await extractProjectFromDocumentWithNvidia({
+        setProcessingStep('DronaHQ Agent: Extracting quotation line items...');
+        extractedData = await extractProjectFromDocumentWithDronaHq({
           fileName: file.name,
           base64Image: base64Data,
           mimeType: 'image/jpeg'
@@ -151,8 +151,8 @@ export default function DocumentOcrUploader({ onExtracted, onClear, currentFileN
         setProcessingStep('Extracting document text stream...');
         const textContent = await readFileAsText(file);
 
-        setProcessingStep('Analyzing quotation line items with NVIDIA AI...');
-        extractedData = await extractProjectFromDocumentWithNvidia({
+        setProcessingStep('Analyzing quotation line items with DronaHQ Agent...');
+        extractedData = await extractProjectFromDocumentWithDronaHq({
           fileName: file.name,
           text: textContent
         });
@@ -194,10 +194,10 @@ export default function DocumentOcrUploader({ onExtracted, onClear, currentFileN
 
     setIsProcessing(true);
     setErrorMessage(null);
-    setProcessingStep('Analyzing quotation text with NVIDIA AI...');
+    setProcessingStep('Analyzing quotation text with DronaHQ Agent...');
 
     try {
-      const extractedData = await extractProjectFromDocumentWithNvidia({
+      const extractedData = await extractProjectFromDocumentWithDronaHq({
         fileName: 'Pasted_Requirements.txt',
         text: pastedText
       });
@@ -217,10 +217,10 @@ export default function DocumentOcrUploader({ onExtracted, onClear, currentFileN
   const handleApplySample = async (sample) => {
     setIsProcessing(true);
     setErrorMessage(null);
-    setProcessingStep(`Analyzing ${sample.name} via NVIDIA OCR...`);
+    setProcessingStep(`Analyzing ${sample.name} via DronaHQ Agent...`);
 
     try {
-      const extractedData = await extractProjectFromDocumentWithNvidia({
+      const extractedData = await extractProjectFromDocumentWithDronaHq({
         fileName: sample.name,
         text: sample.text
       });
@@ -258,7 +258,7 @@ export default function DocumentOcrUploader({ onExtracted, onClear, currentFileN
             <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a' }}>
               Document OCR & Auto-Fill
             </span>
-            <span className="ocr-model-pill">NVIDIA NIM Vision</span>
+            <span className="ocr-model-pill">DronaHQ Agent</span>
           </div>
         </div>
 
@@ -322,7 +322,7 @@ export default function DocumentOcrUploader({ onExtracted, onClear, currentFileN
                 {isProcessing ? processingStep : 'Click to upload or drag & drop quotation document'}
               </p>
               <p style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
-                Supports Invoices, Quotations, PDFs, Images (PNG, JPG) • NVIDIA Multimodal OCR
+                Supports Invoices, Quotations, PDFs, Images (PNG, JPG) • DronaHQ Document Intelligence
               </p>
             </div>
           </div>
@@ -392,7 +392,7 @@ export default function DocumentOcrUploader({ onExtracted, onClear, currentFileN
           <div style={{ flex: 1, fontSize: '0.78rem' }}>
             <strong style={{ color: '#065f46' }}>Auto-filled from: </strong>
             <span style={{ color: '#047857' }}>{extractedFile}</span>
-            <span style={{ color: '#64748b', marginLeft: '6px' }}>(NVIDIA NIM OCR)</span>
+            <span style={{ color: '#64748b', marginLeft: '6px' }}>(DronaHQ Agent OCR)</span>
           </div>
           <button
             type="button"

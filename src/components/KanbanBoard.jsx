@@ -32,30 +32,30 @@ export const STAGES = [
     title: 'Active Delivery',
     description: 'Active development sprint cycles',
     icon: PlayCircle,
-    color: '#2563eb',
+    color: '#1d4ed8',
     bgColor: '#eff6ff',
     borderColor: '#bfdbfe',
-    badgeColor: '#1d4ed8'
+    badgeColor: '#1e40af'
   },
   {
     id: 'testing',
     title: 'Testing & Review',
     description: 'Security audits, QA verification & client reviews',
     icon: ShieldCheck,
-    color: '#f59e0b',
-    bgColor: '#fffbeb',
-    borderColor: '#fde68a',
-    badgeColor: '#b45309'
+    color: '#0284c7',
+    bgColor: '#f0f9ff',
+    borderColor: '#bae6fd',
+    badgeColor: '#0369a1'
   },
   {
     id: 'completed',
     title: 'Delivered / Completed',
     description: 'Successfully launched and closed projects',
     icon: CheckCircle2,
-    color: '#10b981',
-    bgColor: '#ecfdf5',
-    borderColor: '#a7f3d0',
-    badgeColor: '#047857'
+    color: '#0369a1',
+    bgColor: '#f0f9ff',
+    borderColor: '#bfdbfe',
+    badgeColor: '#1e3a8a'
   }
 ];
 
@@ -133,22 +133,22 @@ export default function KanbanBoard({
     const p = priority.toLowerCase();
     if (p.includes('critical') || p.includes('high')) {
       return {
-        bg: '#fef2f2',
-        color: '#dc2626',
-        border: '#fecaca'
+        bg: '#eff6ff',
+        color: '#1d4ed8',
+        border: '#bfdbfe'
       };
     }
     if (p.includes('medium')) {
       return {
-        bg: '#fffbeb',
-        color: '#d97706',
-        border: '#fde68a'
+        bg: '#f0f9ff',
+        color: '#0284c7',
+        border: '#bae6fd'
       };
     }
     return {
-      bg: '#eff6ff',
-      color: '#2563eb',
-      border: '#bfdbfe'
+      bg: '#f8fafc',
+      color: '#475569',
+      border: '#e2e8f0'
     };
   };
 

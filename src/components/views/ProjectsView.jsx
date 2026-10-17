@@ -340,9 +340,9 @@ export default function ProjectsView({ projects: initialProjectsList, employees,
                         className="kanban-priority-pill"
                         style={{
                           fontSize: '0.7rem',
-                          backgroundColor: proj.priority?.includes('High') || proj.priority?.includes('Critical') ? '#fef2f2' : (proj.priority?.includes('Medium') ? '#fffbeb' : '#eff6ff'),
-                          color: proj.priority?.includes('High') || proj.priority?.includes('Critical') ? '#dc2626' : (proj.priority?.includes('Medium') ? '#d97706' : '#2563eb'),
-                          borderColor: proj.priority?.includes('High') || proj.priority?.includes('Critical') ? '#fecaca' : (proj.priority?.includes('Medium') ? '#fde68a' : '#bfdbfe')
+                          backgroundColor: proj.priority?.includes('High') || proj.priority?.includes('Critical') ? '#eff6ff' : (proj.priority?.includes('Medium') ? '#f0f9ff' : '#f8fafc'),
+                          color: proj.priority?.includes('High') || proj.priority?.includes('Critical') ? '#1d4ed8' : (proj.priority?.includes('Medium') ? '#0284c7' : '#475569'),
+                          borderColor: proj.priority?.includes('High') || proj.priority?.includes('Critical') ? '#bfdbfe' : (proj.priority?.includes('Medium') ? '#bae6fd' : '#e2e8f0')
                         }}
                       >
                         {proj.priority}
@@ -422,14 +422,14 @@ export default function ProjectsView({ projects: initialProjectsList, employees,
         </div>
       )}
 
-      {/* Create New Project Modal with NVIDIA Document OCR Auto-Fill */}
+      {/* Create New Project Modal with DronaHQ Document Intelligence Auto-Fill */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal-dialog" onClick={e => e.stopPropagation()} style={{ maxWidth: '620px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div className="modal-header">
               <h3 className="modal-title">Create New Project Initiative</h3>
               <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
-                Upload an RFP or project document to auto-fill fields via NVIDIA OCR, or enter details manually.
+                Upload an RFP or project document to auto-fill fields via DronaHQ Document Agent, or enter details manually.
               </p>
             </div>
             <form onSubmit={handleCreateProject}>

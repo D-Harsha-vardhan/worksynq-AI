@@ -24,11 +24,11 @@ export default function WorkforceUtilizationCard({ stats }) {
 
   // Donut slices
   const slices = [
-    { label: 'Fully Utilized', count: breakdown.fullyUtilized.count, percent: breakdown.fullyUtilized.percent, color: '#10b981' },
-    { label: 'Underutilized', count: breakdown.underutilized.count, percent: breakdown.underutilized.percent, color: '#3b82f6' },
-    { label: 'Overutilized', count: breakdown.overutilized.count, percent: breakdown.overutilized.percent, color: '#ef4444' },
-    { label: 'At capacity', count: breakdown.atCapacity.count, percent: breakdown.atCapacity.percent, color: '#8b5cf6' },
-    { label: 'Available', count: breakdown.available.count, percent: breakdown.available.percent, color: '#0ea5e9' }
+    { label: 'Fully Utilized', count: breakdown.fullyUtilized.count, percent: breakdown.fullyUtilized.percent, color: '#1d4ed8' },
+    { label: 'Underutilized', count: breakdown.underutilized.count, percent: breakdown.underutilized.percent, color: '#60a5fa' },
+    { label: 'Overutilized', count: breakdown.overutilized.count, percent: breakdown.overutilized.percent, color: '#1e3a8a' },
+    { label: 'At capacity', count: breakdown.atCapacity.count, percent: breakdown.atCapacity.percent, color: '#2563eb' },
+    { label: 'Available', count: breakdown.available.count, percent: breakdown.available.percent, color: '#93c5fd' }
   ];
 
   let accumulatedPercent = 0;

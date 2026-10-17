@@ -13,7 +13,7 @@ import {
   Loader2,
   Cpu
 } from 'lucide-react';
-import { askNvidiaAssistant } from '../utils/nvidiaAiService';
+import { askDronaHqAdvisor } from '../utils/dronaHqService';
 
 export default function AiAssistantPanel({
   selectedProject,
@@ -32,7 +32,7 @@ export default function AiAssistantPanel({
     {
       id: 1,
       sender: 'system',
-      text: "Hello! I'm your Workforce Intelligence Assistant powered by NVIDIA NIM. Ask me about optimal project squads, workload rebalancing, skill bottlenecks, or training pathways."
+      text: "Hello! I'm your Workforce Intelligence Assistant powered by DronaHQ Agent. Ask me about optimal project squads, workload rebalancing, skill bottlenecks, or training pathways."
     }
   ]);
 
@@ -78,7 +78,7 @@ export default function AiAssistantPanel({
     setIsGenerating(true);
 
     try {
-      const replyText = await askNvidiaAssistant({
+      const res = await askDronaHqAdvisor({
         prompt: text,
         agentId,
         project: selectedProject,
@@ -92,12 +92,12 @@ export default function AiAssistantPanel({
         {
           id: Date.now() + 1,
           sender: 'assistant',
-          text: replyText,
-          isNvidia: true
+          text: res?.text || res,
+          isDronaHq: true
         }
       ]);
     } catch (err) {
-      console.error('NVIDIA AI query error:', err);
+      console.error('DronaHQ AI query error:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -113,21 +113,21 @@ export default function AiAssistantPanel({
           </div>
           <div>
             <div className="ai-title">AI Assistant</div>
-            <div style={{ fontSize: '0.66rem', color: '#64748b' }}>NVIDIA NIM Microservice</div>
+            <div style={{ fontSize: '0.66rem', color: '#1d4ed8' }}>DronaHQ Agent Service</div>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span
             className="ai-status-pill"
             style={{
-              backgroundColor: 'rgba(118, 185, 0, 0.12)',
-              color: '#365f00',
-              border: '1px solid rgba(118, 185, 0, 0.4)'
+              backgroundColor: '#eff6ff',
+              color: '#1d4ed8',
+              border: '1px solid #bfdbfe'
             }}
-            title="Connected to NVIDIA NIM API (DiffusionGemma-26B)"
+            title="Connected to DronaHQ AI Agent Webhook"
           >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#76b900' }}></span>
-            NVIDIA NIM • Live
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#2563eb' }}></span>
+            DronaHQ Agent • Live
           </span>
           {onClose && (
             <button
@@ -158,7 +158,7 @@ export default function AiAssistantPanel({
                 key={ag.id}
                 className="agent-card"
                 onClick={() => handleSend(ag.samplePrompt, ag.id)}
-                title={`Click to ask ${ag.name} (Powered by NVIDIA NIM)`}
+                title={`Click to ask ${ag.name} (Powered by DronaHQ Agent)`}
                 style={{ opacity: isGenerating ? 0.6 : 1, pointerEvents: isGenerating ? 'none' : 'auto' }}
               >
                 <div className={`agent-avatar-icon ${ag.colorClass}`}>
@@ -222,11 +222,11 @@ export default function AiAssistantPanel({
               <div><strong>You:</strong> {msg.text}</div>
             ) : (
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '700', marginBottom: '4px', color: '#166534' }}>
-                  <Cpu size={12} color="#76b900" />
-                  <span>NVIDIA NIM Copilot:</span>
-                  <span style={{ fontSize: '0.62rem', backgroundColor: 'rgba(118, 185, 0, 0.15)', color: '#3f6c00', padding: '1px 5px', borderRadius: '4px' }}>
-                    DiffusionGemma
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '700', marginBottom: '4px', color: '#1d4ed8' }}>
+                  <Cpu size={12} color="#2563eb" />
+                  <span>DronaHQ Agent:</span>
+                  <span style={{ fontSize: '0.62rem', backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 5px', borderRadius: '4px' }}>
+                    Agent Webhook
                   </span>
                 </div>
                 <div>{msg.text}</div>
@@ -242,9 +242,9 @@ export default function AiAssistantPanel({
               padding: '10px 14px',
               borderRadius: '8px',
               fontSize: '0.76rem',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              color: '#1d4ed8',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
@@ -252,8 +252,8 @@ export default function AiAssistantPanel({
               alignSelf: 'flex-start'
             }}
           >
-            <Loader2 size={14} className="spin-animation" color="#76b900" />
-            <span>NVIDIA NIM is reasoning...</span>
+            <Loader2 size={14} className="spin-animation" color="#2563eb" />
+            <span>DronaHQ Agent is reasoning...</span>
           </div>
         )}
       </div>
@@ -270,7 +270,7 @@ export default function AiAssistantPanel({
           <input
             type="text"
             className="ai-text-input"
-            placeholder={isGenerating ? "NVIDIA AI is thinking..." : "Ask a question..."}
+            placeholder={isGenerating ? "DronaHQ Agent is thinking..." : "Ask a question..."}
             value={inputText}
             disabled={isGenerating}
             onChange={(e) => setInputText(e.target.value)}

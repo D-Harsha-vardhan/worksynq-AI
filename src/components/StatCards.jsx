@@ -19,7 +19,7 @@ export default function StatCards({ employeesCount = 60, projectsCount = 8, avgU
       trendDir: 'up',
       sub: 'vs last month',
       icon: Briefcase,
-      iconClass: 'kpi-icon-emerald'
+      iconClass: 'kpi-icon-sapphire'
     },
     {
       label: 'Avg. Utilization',
@@ -28,7 +28,7 @@ export default function StatCards({ employeesCount = 60, projectsCount = 8, avgU
       trendDir: 'up',
       sub: 'vs last month',
       icon: PieChart,
-      iconClass: 'kpi-icon-purple'
+      iconClass: 'kpi-icon-sky'
     },
     {
       label: 'Open Skill Gaps',
@@ -37,7 +37,7 @@ export default function StatCards({ employeesCount = 60, projectsCount = 8, avgU
       trendDir: 'down',
       sub: 'vs last month',
       icon: AlertTriangle,
-      iconClass: 'kpi-icon-rose'
+      iconClass: 'kpi-icon-navy'
     }
   ];
 

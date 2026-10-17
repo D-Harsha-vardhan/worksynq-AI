@@ -56,9 +56,9 @@ export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggl
                     fontWeight: '700',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(101, 163, 13, 0.12)',
-                    color: isActive ? '#ffffff' : '#4d7c0f',
-                    border: isActive ? 'none' : '1px solid rgba(101, 163, 13, 0.25)'
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : '#eff6ff',
+                    color: isActive ? '#ffffff' : '#1d4ed8',
+                    border: isActive ? 'none' : '1px solid #bfdbfe'
                   }}
                 >
                   AI
