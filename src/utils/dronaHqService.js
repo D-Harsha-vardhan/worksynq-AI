@@ -1,10 +1,9 @@
 // DronaHQ Autonomous AI Agent Webhook Service
-// Connected to DronaHQ Agent Webhook: https://agents-backend.dronahq.com/webhook/80855697-41fa-47ac-a1c3-fcce0ee24c72
-// API Key: sk_GjynvRuJuHUNYNoiCUOUphaLucZcarnE
 // Pure DronaHQ Agent execution without external vendor API dependencies
+// Configure via VITE_DRONAHQ_WEBHOOK_URL and VITE_DRONAHQ_API_KEY in .env
 
 export const DRONAHQ_WEBHOOK_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_DRONAHQ_WEBHOOK_URL) || 'https://agents-backend.dronahq.com/webhook/80855697-41fa-47ac-a1c3-fcce0ee24c72';
-export const DRONAHQ_API_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_DRONAHQ_API_KEY) || 'sk_GjynvRuJuHUNYNoiCUOUphaLucZcarnE';
+export const DRONAHQ_API_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_DRONAHQ_API_KEY) || '';
 
 const PRIMARY_PROXY_ENDPOINT = '/api/dronahq/webhook/80855697-41fa-47ac-a1c3-fcce0ee24c72';
 const DIRECT_ENDPOINT = DRONAHQ_WEBHOOK_URL;

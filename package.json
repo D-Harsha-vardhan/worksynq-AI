@@ -1,5 +1,6 @@
 {
-  "name": "workforce-intelligence",
+  "name": "worksynq-ai",
+  "description": "WorkSynq AI - Autonomous Talent Planning & Workforce Intelligence Copilot",
   "private": true,
   "version": "1.0.0",
   "type": "module",
