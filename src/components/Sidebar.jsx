@@ -69,6 +69,26 @@ export default function Sidebar({ activeTab, setActiveTab, showAiDrawer, onToggl
         })}
       </nav>
 
+      <div style={{ padding: '0 16px 12px' }}>
+        <div
+          style={{
+            padding: '8px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#2563eb', flexShrink: 0 }}></span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#1d4ed8' }}>Workforce Copilot</div>
+            <div style={{ fontSize: '0.64rem', color: '#64748b' }}>Enterprise Engine • Live</div>
+          </div>
+        </div>
+      </div>
+
       <div className="sidebar-footer">
         <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
           <Sparkles size={12} color="#3b82f6" />
