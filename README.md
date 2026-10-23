@@ -220,7 +220,7 @@ worksynq-AI/
 
 ---
 
-## 🔒 Security & Credential Management
+## 🔒 *Security & Credential Management*
 
 - **Zero Credentials in Git**: All sensitive API keys, webhook URLs, and secrets are strictly excluded via `.gitignore`.
 - **Environment Driven**: Production deployments read credentials exclusively from environment variables (`import.meta.env`).
